@@ -57,24 +57,37 @@ export default function NewRequestPage() {
   };
 
   const uploadFile = async (file: File) => {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random()}.${fileExt}`;
-    const filePath = `${user?.id}/${fileName}`;
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+      const filePath = `${user?.id}/${fileName}`;
 
-    const { error: uploadError, data } = await supabase.storage
-      .from('request-media')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: false
-      });
+      // Перевіряємо розмір файлу (наприклад, до 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        throw new Error('Файл занадто великий (максимум 10MB)');
+      }
 
-    if (uploadError) throw uploadError;
+      const { error: uploadError, data } = await supabase.storage
+        .from('request-media')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('request-media')
-      .getPublicUrl(filePath);
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
 
-    return publicUrl;
+      const { data: { publicUrl } } = supabase.storage
+        .from('request-media')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error in uploadFile:', error);
+      throw error;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -86,12 +99,17 @@ export default function NewRequestPage() {
       // Завантажуємо всі файли
       const mediaUrls = await Promise.all(
         mediaFiles.map(async (media, index) => {
-          const url = await uploadFile(media.file);
-          setUploadProgress(((index + 1) / mediaFiles.length) * 100);
-          return {
-            url,
-            type: media.type
-          };
+          try {
+            const url = await uploadFile(media.file);
+            setUploadProgress(((index + 1) / mediaFiles.length) * 100);
+            return {
+              url,
+              type: media.type
+            };
+          } catch (error) {
+            console.error(`Error uploading file ${index}:`, error);
+            throw error;
+          }
         })
       );
 
@@ -107,11 +125,15 @@ export default function NewRequestPage() {
           media_urls: mediaUrls
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating request:', error);
+        throw error;
+      }
+
       router.push('/requests');
     } catch (error) {
-      console.error('Error creating request:', error);
-      alert('Помилка при створенні запиту. Спробуйте ще раз.');
+      console.error('Error in handleSubmit:', error);
+      alert(`Помилка при створенні запиту: ${error instanceof Error ? error.message : 'Невідома помилка'}`);
     } finally {
       setIsSubmitting(false);
       setUploadProgress(0);

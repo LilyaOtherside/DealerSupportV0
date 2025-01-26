@@ -16,7 +16,10 @@ export interface Request {
   description: string;
   priority: 'low' | 'medium' | 'high';
   status: 'new' | 'in_progress' | 'resolved' | 'closed';
-  media_urls: string[];
+  media_urls: {
+    url: string;
+    type: 'image' | 'video' | 'document';
+  }[];
   assigned_admin_id?: string;
   created_at: Date;
   updated_at: Date;

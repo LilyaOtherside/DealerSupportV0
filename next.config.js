@@ -4,6 +4,9 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  images: {
+    domains: ['ypdpgnrybnobsvgjjygc.supabase.co'], // Замініть на ваш домен Supabase
+  }
 }
 
 module.exports = nextConfig 
