@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTelegram } from '@/lib/hooks/useTelegram';
 
 export default function TelegramAuth() {
-  const { user, loading } = useTelegram();
+  const { user, loading, isTelegramApp } = useTelegram();
   const router = useRouter();
 
   useEffect(() => {
@@ -26,7 +26,7 @@ export default function TelegramAuth() {
     );
   }
 
-  if (!user) {
+  if (!isTelegramApp) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <h1 className="text-2xl font-bold mb-4">

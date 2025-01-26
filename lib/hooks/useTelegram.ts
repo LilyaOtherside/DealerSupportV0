@@ -4,38 +4,36 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { User } from '@/app/types';
 
-interface TelegramUser {
-  id: number;
-  first_name: string;
-  last_name?: string;
-  username?: string;
-  photo_url?: string;
-}
-
 export function useTelegram() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isTelegramApp, setIsTelegramApp] = useState(false);
 
   useEffect(() => {
     const initTelegram = async () => {
-      if (typeof window !== 'undefined') {
-        const telegram = window.Telegram?.WebApp;
-        if (telegram) {
-          const tgUser = telegram.initDataUnsafe?.user as TelegramUser;
-          
-          if (tgUser) {
+      if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+        const webapp = window.Telegram.WebApp;
+        
+        // Повідомляємо Telegram що додаток готовий
+        webapp.ready();
+        // Розгортаємо на весь екран
+        webapp.expand();
+        
+        setIsTelegramApp(true);
+
+        const tgUser = webapp.initDataUnsafe?.user;
+        if (tgUser) {
+          try {
             // Перевіряємо чи існує користувач
-            const { data: existingUser } = await supabase
+            const { data: existingUser, error: fetchError } = await supabase
               .from('users')
               .select()
               .eq('telegram_id', tgUser.id.toString())
               .single();
 
-            if (existingUser) {
-              setUser(existingUser as User);
-            } else {
-              // Створюємо нового користувача
-              const { data: newUser } = await supabase
+            if (fetchError && fetchError.code === 'PGRST116') {
+              // Користувача не знайдено, створюємо нового
+              const { data: newUser, error: insertError } = await supabase
                 .from('users')
                 .insert({
                   telegram_id: tgUser.id.toString(),
@@ -46,10 +44,14 @@ export function useTelegram() {
                 .select()
                 .single();
 
-              if (newUser) {
+              if (!insertError && newUser) {
                 setUser(newUser as User);
               }
+            } else if (existingUser) {
+              setUser(existingUser as User);
             }
+          } catch (error) {
+            console.error('Error initializing user:', error);
           }
         }
       }
@@ -59,5 +61,5 @@ export function useTelegram() {
     initTelegram();
   }, []);
 
-  return { user, loading };
+  return { user, loading, isTelegramApp };
 } 
