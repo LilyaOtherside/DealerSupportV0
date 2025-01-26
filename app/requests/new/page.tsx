@@ -1,19 +1,81 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@/lib/contexts/UserContext';
 import { supabase } from '@/lib/supabase';
+import Image from 'next/image';
 
 type Priority = 'low' | 'medium' | 'high';
+type MediaFile = {
+  file: File;
+  preview: string;
+  type: 'image' | 'video' | 'document';
+};
 
 export default function NewRequestPage() {
   const router = useRouter();
   const { user } = useUser();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<Priority>('medium');
+  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const newFiles: MediaFile[] = Array.from(files).map(file => {
+      const type = file.type.startsWith('image/') 
+        ? 'image' 
+        : file.type.startsWith('video/') 
+        ? 'video' 
+        : 'document';
+
+      return {
+        file,
+        preview: type === 'image' ? URL.createObjectURL(file) : '',
+        type
+      };
+    });
+
+    setMediaFiles(prev => [...prev, ...newFiles]);
+  };
+
+  const removeFile = (index: number) => {
+    setMediaFiles(prev => {
+      const newFiles = [...prev];
+      if (newFiles[index].preview) {
+        URL.revokeObjectURL(newFiles[index].preview);
+      }
+      newFiles.splice(index, 1);
+      return newFiles;
+    });
+  };
+
+  const uploadFile = async (file: File) => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${user?.id}/${fileName}`;
+
+    const { error: uploadError, data } = await supabase.storage
+      .from('request-media')
+      .upload(filePath, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (uploadError) throw uploadError;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('request-media')
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,6 +83,19 @@ export default function NewRequestPage() {
 
     setIsSubmitting(true);
     try {
+      // Завантажуємо всі файли
+      const mediaUrls = await Promise.all(
+        mediaFiles.map(async (media, index) => {
+          const url = await uploadFile(media.file);
+          setUploadProgress(((index + 1) / mediaFiles.length) * 100);
+          return {
+            url,
+            type: media.type
+          };
+        })
+      );
+
+      // Створюємо запит
       const { error } = await supabase
         .from('requests')
         .insert({
@@ -29,7 +104,7 @@ export default function NewRequestPage() {
           description,
           priority,
           status: 'new',
-          media_urls: []
+          media_urls: mediaUrls
         });
 
       if (error) throw error;
@@ -39,6 +114,7 @@ export default function NewRequestPage() {
       alert('Помилка при створенні запиту. Спробуйте ще раз.');
     } finally {
       setIsSubmitting(false);
+      setUploadProgress(0);
     }
   };
 
@@ -106,6 +182,64 @@ export default function NewRequestPage() {
             ))}
           </div>
         </div>
+
+        {/* Медіа файли */}
+        <div>
+          <label className="block text-sm text-tg-theme-hint mb-2">
+            Медіа файли
+          </label>
+          <div className="grid grid-cols-3 gap-2 mb-2">
+            {mediaFiles.map((media, index) => (
+              <div key={index} className="relative">
+                {media.type === 'image' ? (
+                  <div className="aspect-square relative">
+                    <Image
+                      src={media.preview}
+                      alt="Preview"
+                      fill
+                      className="object-cover rounded-lg"
+                    />
+                  </div>
+                ) : (
+                  <div className="aspect-square bg-tg-theme-section rounded-lg flex items-center justify-center">
+                    {media.type === 'video' ? '🎥' : '📄'}
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => removeFile(index)}
+                  className="absolute -top-2 -right-2 bg-red-500 rounded-full w-6 h-6 flex items-center justify-center"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="aspect-square bg-tg-theme-section rounded-lg flex items-center justify-center text-2xl text-tg-theme-hint"
+            >
+              +
+            </button>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*,video/*,application/pdf"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+        </div>
+
+        {uploadProgress > 0 && (
+          <div className="w-full bg-tg-theme-section rounded-full h-2">
+            <div 
+              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${uploadProgress}%` }}
+            />
+          </div>
+        )}
 
         <button
           type="submit"
