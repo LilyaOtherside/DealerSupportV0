@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 
 export default function TelegramAuth() {
   const [isTelegramApp, setIsTelegramApp] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -14,8 +15,17 @@ export default function TelegramAuth() {
         setIsTelegramApp(true);
         telegram.expand(); // Включаємо Full Screen Mode
       }
+      setIsLoading(false);
     }
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+      </div>
+    );
+  }
 
   if (!isTelegramApp) {
     return (
@@ -30,5 +40,5 @@ export default function TelegramAuth() {
     );
   }
 
-  return <div></div>;
+  return <div className="telegram-app-container"></div>;
 } 
