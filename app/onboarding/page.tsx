@@ -70,45 +70,85 @@ export default function OnboardingPage() {
 
   if (loading || isSubmitting) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex justify-center items-center min-h-screen bg-[#0F0F0F]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      {currentStep === 'city' ? (
-        <div>
-          <h1 className="text-2xl font-bold mb-6">Оберіть ваше місто</h1>
-          <div className="grid grid-cols-2 gap-4">
-            {cities.map((city) => (
-              <button
-                key={city}
-                onClick={() => handleCitySelect(city)}
-                className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200"
-              >
-                {city}
-              </button>
-            ))}
-          </div>
+    <div className="min-h-screen bg-[#0F0F0F] text-white">
+      {/* Верхня панель */}
+      <div className="bg-[#1C1C1C] p-4 flex justify-between items-center">
+        <div className="text-lg font-medium">
+          {currentStep === 'city' ? 'Вибір міста' : 'Вибір центру'}
         </div>
-      ) : (
-        <div>
-          <h1 className="text-2xl font-bold mb-6">Оберіть дилерський центр</h1>
-          <div className="flex flex-col gap-4">
-            {dealerCenters[selectedCity as keyof typeof dealerCenters].map((dealer) => (
-              <button
-                key={dealer}
-                onClick={() => handleDealerSelect(dealer)}
-                className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow border border-gray-200 text-left"
-              >
-                {dealer}
-              </button>
-            ))}
-          </div>
+        <div className="text-sm text-gray-400">
+          {currentStep === 'city' ? '1/2' : '2/2'}
         </div>
-      )}
+      </div>
+
+      {/* Основний контент */}
+      <div className="p-4">
+        {currentStep === 'city' ? (
+          <div>
+            <h2 className="text-xl mb-2">Limited Quest</h2>
+            <p className="text-gray-400 mb-6">Оберіть ваше місто для продовження</p>
+            <div className="space-y-3">
+              {cities.map((city) => (
+                <button
+                  key={city}
+                  onClick={() => handleCitySelect(city)}
+                  className="w-full p-4 bg-[#1C1C1C] rounded-xl flex items-center justify-between hover:bg-[#252525] transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-[#2C2C2C] rounded-full flex items-center justify-center">
+                      🏢
+                    </div>
+                    <span>{city}</span>
+                  </div>
+                  <div className="text-gray-400">→</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div>
+            <h2 className="text-xl mb-2">Share Story</h2>
+            <p className="text-gray-400 mb-6">Оберіть дилерський центр</p>
+            <div className="space-y-3">
+              {dealerCenters[selectedCity as keyof typeof dealerCenters].map((dealer) => (
+                <button
+                  key={dealer}
+                  onClick={() => handleDealerSelect(dealer)}
+                  className="w-full p-4 bg-[#1C1C1C] rounded-xl flex items-center justify-between hover:bg-[#252525] transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-[#2C2C2C] rounded-full flex items-center justify-center">
+                      🏪
+                    </div>
+                    <span>{dealer}</span>
+                  </div>
+                  <div className="text-gray-400">→</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Нижня навігація */}
+      <div className="fixed bottom-0 left-0 right-0 bg-[#1C1C1C] p-4 flex justify-around">
+        <button className="p-2 rounded-full bg-[#2C2C2C]">
+          <span className="text-xl">🏠</span>
+        </button>
+        <button className="p-2 rounded-full bg-[#2C2C2C]">
+          <span className="text-xl">⚡</span>
+        </button>
+        <button className="p-2 rounded-full bg-[#2C2C2C]">
+          <span className="text-xl">⚙️</span>
+        </button>
+      </div>
     </div>
   );
 } 
