@@ -30,5 +30,5 @@ export default function TelegramAuth(): JSX.Element {
     );
   }
 
-  return null;
+  return <div></div>;
 } 
