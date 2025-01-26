@@ -1,3 +1,4 @@
+import './globals.css';
 import { UserProvider } from '@/lib/contexts/UserContext';
 
 export const metadata = {
@@ -17,7 +18,7 @@ export default function RootLayout({
         <script src="https://telegram.org/js/telegram-web-app.js" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
       </head>
-      <body>
+      <body className="bg-tg-theme-bg text-white">
         <UserProvider>
           {children}
         </UserProvider>

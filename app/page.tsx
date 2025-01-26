@@ -3,9 +3,8 @@ import OnboardingLayout from '@/components/onboarding/OnboardingLayout';
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gray-50">
-      <TelegramAuth />
-      <OnboardingLayout />
-    </main>
+    <div className="bg-red-500 p-4">
+      <h1 className="text-2xl">Test Tailwind</h1>
+    </div>
   );
 } 

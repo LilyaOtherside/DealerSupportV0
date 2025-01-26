@@ -3,18 +3,12 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 255, 255, 255;
-  --background-start-rgb: 15, 15, 15;
-  --background-end-rgb: 15, 15, 15;
+  color-scheme: dark;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-start-rgb));
-}
-
-/* Для iOS */
-body {
+  background: #0F0F0F;
+  color: white;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior: none;
 }
