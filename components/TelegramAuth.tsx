@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function TelegramAuth(): JSX.Element {
+export default function TelegramAuth() {
   const [isTelegramApp, setIsTelegramApp] = useState<boolean>(false);
   const router = useRouter();
 
