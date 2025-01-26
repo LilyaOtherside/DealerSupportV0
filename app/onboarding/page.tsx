@@ -16,21 +16,39 @@ export default function OnboardingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const cities = [
-    'Київ',
-    'Харків',
-    'Дніпро',
-    'Одеса',
-    'Львів',
-    'Запоріжжя'
+    { id: 'kyiv', name: 'Київ', icon: '🏢' },
+    { id: 'kharkiv', name: 'Харків', icon: '🏢' },
+    { id: 'dnipro', name: 'Дніпро', icon: '🏢' },
+    { id: 'odesa', name: 'Одеса', icon: '🏢' },
+    { id: 'lviv', name: 'Львів', icon: '🏢' },
+    { id: 'zaporizhzhia', name: 'Запоріжжя', icon: '🏢' }
   ];
 
   const dealerCenters = {
-    'Київ': ['Автоцентр на Столичному', 'Автосалон на Петрівці'],
-    'Харків': ['Автоцентр на Гагаріна', 'Автосалон на Героїв Праці'],
-    'Дніпро': ['Автоцентр на Набережній', 'Автосалон на Слобожанському'],
-    'Одеса': ['Автоцентр на Таїрова', 'Автосалон в Аркадії'],
-    'Львів': ['Автоцентр на Шевченка', 'Автосалон на Франка'],
-    'Запоріжжя': ['Автоцентр на Перемоги', 'Автосалон на Соборному']
+    'Київ': [
+      { id: 'kyiv-1', name: 'Автоцентр на Столичному', icon: '🏪' },
+      { id: 'kyiv-2', name: 'Автосалон на Петрівці', icon: '🏪' }
+    ],
+    'Харків': [
+      { id: 'kharkiv-1', name: 'Автоцентр на Гагаріна', icon: '🏪' },
+      { id: 'kharkiv-2', name: 'Автосалон на Героїв Праці', icon: '🏪' }
+    ],
+    'Дніпро': [
+      { id: 'dnipro-1', name: 'Автоцентр на Набережній', icon: '🏪' },
+      { id: 'dnipro-2', name: 'Автосалон на Слобожанському', icon: '🏪' }
+    ],
+    'Одеса': [
+      { id: 'odesa-1', name: 'Автоцентр на Таїрова', icon: '🏪' },
+      { id: 'odesa-2', name: 'Автосалон в Аркадії', icon: '🏪' }
+    ],
+    'Львів': [
+      { id: 'lviv-1', name: 'Автоцентр на Шевченка', icon: '🏪' },
+      { id: 'lviv-2', name: 'Автосалон на Франка', icon: '🏪' }
+    ],
+    'Запоріжжя': [
+      { id: 'zaporizhzhia-1', name: 'Автоцентр на Перемоги', icon: '🏪' },
+      { id: 'zaporizhzhia-2', name: 'Автосалон на Соборному', icon: '🏪' }
+    ]
   };
 
   useEffect(() => {
@@ -70,20 +88,20 @@ export default function OnboardingPage() {
 
   if (loading || isSubmitting) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-[#0F0F0F]">
+      <div className="flex justify-center items-center min-h-screen bg-tg-theme-bg">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0F0F0F] text-white">
+    <div className="min-h-screen bg-tg-theme-bg text-white">
       {/* Верхня панель */}
-      <div className="bg-[#1C1C1C] p-4 flex justify-between items-center">
+      <div className="bg-tg-theme-section p-4 flex justify-between items-center safe-top">
         <div className="text-lg font-medium">
           {currentStep === 'city' ? 'Вибір міста' : 'Вибір центру'}
         </div>
-        <div className="text-sm text-gray-400">
+        <div className="text-sm text-tg-theme-hint">
           {currentStep === 'city' ? '1/2' : '2/2'}
         </div>
       </div>
@@ -92,44 +110,44 @@ export default function OnboardingPage() {
       <div className="p-4">
         {currentStep === 'city' ? (
           <div>
-            <h2 className="text-xl mb-2">Limited Quest</h2>
-            <p className="text-gray-400 mb-6">Оберіть ваше місто для продовження</p>
+            <h2 className="text-xl mb-2">Оберіть місто</h2>
+            <p className="text-tg-theme-hint mb-6">Виберіть ваше місто для продовження</p>
             <div className="space-y-3">
               {cities.map((city) => (
                 <button
-                  key={city}
-                  onClick={() => handleCitySelect(city)}
-                  className="w-full p-4 bg-[#1C1C1C] rounded-xl flex items-center justify-between hover:bg-[#252525] transition-colors"
+                  key={city.id}
+                  onClick={() => handleCitySelect(city.name)}
+                  className="tg-button"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-[#2C2C2C] rounded-full flex items-center justify-center">
-                      🏢
+                    <div className="tg-icon-container">
+                      {city.icon}
                     </div>
-                    <span>{city}</span>
+                    <span>{city.name}</span>
                   </div>
-                  <div className="text-gray-400">→</div>
+                  <div className="text-tg-theme-hint">→</div>
                 </button>
               ))}
             </div>
           </div>
         ) : (
           <div>
-            <h2 className="text-xl mb-2">Share Story</h2>
-            <p className="text-gray-400 mb-6">Оберіть дилерський центр</p>
+            <h2 className="text-xl mb-2">Оберіть центр</h2>
+            <p className="text-tg-theme-hint mb-6">Виберіть ваш дилерський центр</p>
             <div className="space-y-3">
               {dealerCenters[selectedCity as keyof typeof dealerCenters].map((dealer) => (
                 <button
-                  key={dealer}
-                  onClick={() => handleDealerSelect(dealer)}
-                  className="w-full p-4 bg-[#1C1C1C] rounded-xl flex items-center justify-between hover:bg-[#252525] transition-colors"
+                  key={dealer.id}
+                  onClick={() => handleDealerSelect(dealer.name)}
+                  className="tg-button"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-[#2C2C2C] rounded-full flex items-center justify-center">
-                      🏪
+                    <div className="tg-icon-container">
+                      {dealer.icon}
                     </div>
-                    <span>{dealer}</span>
+                    <span>{dealer.name}</span>
                   </div>
-                  <div className="text-gray-400">→</div>
+                  <div className="text-tg-theme-hint">→</div>
                 </button>
               ))}
             </div>
@@ -138,14 +156,14 @@ export default function OnboardingPage() {
       </div>
 
       {/* Нижня навігація */}
-      <div className="fixed bottom-0 left-0 right-0 bg-[#1C1C1C] p-4 flex justify-around">
-        <button className="p-2 rounded-full bg-[#2C2C2C]">
+      <div className="fixed bottom-0 left-0 right-0 bg-tg-theme-section p-4 flex justify-around safe-bottom">
+        <button className="p-2 rounded-full bg-tg-theme-button">
           <span className="text-xl">🏠</span>
         </button>
-        <button className="p-2 rounded-full bg-[#2C2C2C]">
+        <button className="p-2 rounded-full bg-tg-theme-button">
           <span className="text-xl">⚡</span>
         </button>
-        <button className="p-2 rounded-full bg-[#2C2C2C]">
+        <button className="p-2 rounded-full bg-tg-theme-button">
           <span className="text-xl">⚙️</span>
         </button>
       </div>
