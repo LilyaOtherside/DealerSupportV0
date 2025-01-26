@@ -4,8 +4,8 @@ export interface User {
   name: string;
   photo_url?: string;
   role: 'dealer' | 'admin' | 'superadmin';
-  city: string;
-  dealer_center: string;
+  city?: string;
+  dealer_center?: string;
   created_at: Date;
 }
 
