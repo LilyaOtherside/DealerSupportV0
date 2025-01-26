@@ -11,6 +11,8 @@ body {
   color: white;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior: none;
+  margin: 0;
+  padding: 0;
 }
 
 /* Для скролу */
@@ -25,5 +27,15 @@ body {
   }
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@layer components {
+  .tg-button {
+    @apply w-full p-4 bg-tg-theme-section rounded-xl flex items-center justify-between hover:bg-[#252525] transition-colors;
+  }
+
+  .tg-icon-container {
+    @apply w-10 h-10 bg-tg-theme-button rounded-full flex items-center justify-center;
   }
 } 
