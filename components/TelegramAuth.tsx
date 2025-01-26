@@ -1,25 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTelegram } from '@/lib/hooks/useTelegram';
 
 export default function TelegramAuth() {
-  const [isTelegramApp, setIsTelegramApp] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { user, loading } = useTelegram();
   const router = useRouter();
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const telegram = window.Telegram?.WebApp;
-      if (telegram) {
-        setIsTelegramApp(true);
-        telegram.expand(); // Включаємо Full Screen Mode
+    if (!loading && user) {
+      if (!user.city || !user.dealer_center) {
+        router.push('/onboarding');
+      } else {
+        router.push('/requests');
       }
-      setIsLoading(false);
     }
-  }, []);
+  }, [user, loading, router]);
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
@@ -27,7 +26,7 @@ export default function TelegramAuth() {
     );
   }
 
-  if (!isTelegramApp) {
+  if (!user) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <h1 className="text-2xl font-bold mb-4">
