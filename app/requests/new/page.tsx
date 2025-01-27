@@ -5,6 +5,19 @@ import { useRouter } from 'next/navigation';
 import { useUser } from '@/lib/contexts/UserContext';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
+import { 
+  ArrowLeft,
+  Upload,
+  X,
+  Image as ImageIcon,
+  FileVideo,
+  File,
+  Loader2
+} from 'lucide-react';
 
 type Priority = 'low' | 'medium' | 'high';
 type MediaFile = {
@@ -62,7 +75,6 @@ export default function NewRequestPage() {
       const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
       const filePath = `${user?.id}/${fileName}`;
 
-      // Перевіряємо розмір файлу (наприклад, до 10MB)
       if (file.size > 10 * 1024 * 1024) {
         throw new Error('Файл занадто великий (максимум 10MB)');
       }
@@ -74,10 +86,7 @@ export default function NewRequestPage() {
           upsert: false
         });
 
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw uploadError;
-      }
+      if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
         .from('request-media')
@@ -96,7 +105,6 @@ export default function NewRequestPage() {
 
     setIsSubmitting(true);
     try {
-      // Завантажуємо всі файли
       const mediaUrls = await Promise.all(
         mediaFiles.map(async (media, index) => {
           try {
@@ -113,7 +121,6 @@ export default function NewRequestPage() {
         })
       );
 
-      // Створюємо запит
       const { error } = await supabase
         .from('requests')
         .insert({
@@ -125,11 +132,7 @@ export default function NewRequestPage() {
           media_urls: mediaUrls
         });
 
-      if (error) {
-        console.error('Error creating request:', error);
-        throw error;
-      }
-
+      if (error) throw error;
       router.push('/requests');
     } catch (error) {
       console.error('Error in handleSubmit:', error);
@@ -144,14 +147,16 @@ export default function NewRequestPage() {
     <div className="min-h-screen bg-tg-theme-bg text-white">
       {/* Верхня панель */}
       <div className="bg-tg-theme-section p-4 flex justify-between items-center safe-top">
-        <button 
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => router.back()}
           className="text-tg-theme-hint"
         >
-          ← Назад
-        </button>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
         <div className="text-lg font-medium">Новий запит</div>
-        <div className="w-10"></div>
+        <div className="w-10" />
       </div>
 
       {/* Форма */}
@@ -160,11 +165,10 @@ export default function NewRequestPage() {
           <label className="block text-sm text-tg-theme-hint mb-2">
             Тема запиту
           </label>
-          <input
-            type="text"
+          <Input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full p-3 bg-tg-theme-section rounded-lg text-white"
+            className="bg-tg-theme-section border-0"
             placeholder="Введіть тему запиту"
             required
           />
@@ -174,10 +178,10 @@ export default function NewRequestPage() {
           <label className="block text-sm text-tg-theme-hint mb-2">
             Опис проблеми
           </label>
-          <textarea
+          <Textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full p-3 bg-tg-theme-section rounded-lg text-white min-h-[120px]"
+            className="bg-tg-theme-section border-0 min-h-[120px]"
             placeholder="Опишіть вашу проблему детально"
             required
           />
@@ -188,19 +192,16 @@ export default function NewRequestPage() {
             Пріоритет
           </label>
           <div className="grid grid-cols-3 gap-2">
-            {(['low', 'medium', 'high'] as Priority[]).map((p) => (
-              <button
+            {(['low', 'medium', 'high'] as const).map((p) => (
+              <Button
                 key={p}
                 type="button"
+                variant={priority === p ? "default" : "secondary"}
                 onClick={() => setPriority(p)}
-                className={`p-2 rounded-lg ${
-                  priority === p 
-                    ? 'bg-blue-500 text-white' 
-                    : 'bg-tg-theme-section text-tg-theme-hint'
-                }`}
+                className={priority === p ? "" : "bg-tg-theme-section"}
               >
                 {p === 'low' ? 'Низький' : p === 'medium' ? 'Середній' : 'Високий'}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -210,11 +211,11 @@ export default function NewRequestPage() {
           <label className="block text-sm text-tg-theme-hint mb-2">
             Медіа файли
           </label>
-          <div className="grid grid-cols-3 gap-2 mb-2">
+          <div className="grid grid-cols-4 gap-2">
             {mediaFiles.map((media, index) => (
-              <div key={index} className="relative">
+              <div key={index} className="relative aspect-square">
                 {media.type === 'image' ? (
-                  <div className="aspect-square relative">
+                  <div className="relative w-full h-full">
                     <Image
                       src={media.preview}
                       alt="Preview"
@@ -223,26 +224,33 @@ export default function NewRequestPage() {
                     />
                   </div>
                 ) : (
-                  <div className="aspect-square bg-tg-theme-section rounded-lg flex items-center justify-center">
-                    {media.type === 'video' ? '🎥' : '📄'}
+                  <div className="w-full h-full bg-tg-theme-section rounded-lg flex items-center justify-center">
+                    {media.type === 'video' ? (
+                      <FileVideo className="h-6 w-6 text-tg-theme-hint" />
+                    ) : (
+                      <File className="h-6 w-6 text-tg-theme-hint" />
+                    )}
                   </div>
                 )}
-                <button
+                <Button
                   type="button"
+                  variant="destructive"
+                  size="icon"
+                  className="absolute -top-2 -right-2 h-6 w-6"
                   onClick={() => removeFile(index)}
-                  className="absolute -top-2 -right-2 bg-red-500 rounded-full w-6 h-6 flex items-center justify-center"
                 >
-                  ✕
-                </button>
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
             ))}
-            <button
+            <Button
               type="button"
+              variant="outline"
+              className="aspect-square bg-tg-theme-section border-2 border-dashed border-tg-theme-button hover:border-blue-500 hover:bg-tg-theme-section"
               onClick={() => fileInputRef.current?.click()}
-              className="aspect-square bg-tg-theme-section rounded-lg flex items-center justify-center text-2xl text-tg-theme-hint"
             >
-              +
-            </button>
+              <Upload className="h-6 w-6" />
+            </Button>
           </div>
           <input
             ref={fileInputRef}
@@ -255,23 +263,23 @@ export default function NewRequestPage() {
         </div>
 
         {uploadProgress > 0 && (
-          <div className="w-full bg-tg-theme-section rounded-full h-2">
-            <div 
-              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${uploadProgress}%` }}
-            />
-          </div>
+          <Progress value={uploadProgress} className="bg-tg-theme-section" />
         )}
 
-        <button
+        <Button
           type="submit"
           disabled={isSubmitting}
-          className={`w-full p-4 rounded-lg bg-blue-500 text-white font-medium ${
-            isSubmitting ? 'opacity-50' : ''
-          }`}
+          className="w-full bg-blue-500 hover:bg-blue-600"
         >
-          {isSubmitting ? 'Створення...' : 'Створити запит'}
-        </button>
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Створення...
+            </>
+          ) : (
+            'Створити запит'
+          )}
+        </Button>
       </form>
     </div>
   );
