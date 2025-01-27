@@ -5,6 +5,16 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Request } from '@/app/types';
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { 
+  Plus, 
+  Clock, 
+  AlertCircle,
+  MessageCircle,
+  ChevronRight,
+  Loader2
+} from 'lucide-react';
 
 export default function RequestsPage() {
   const { user, loading } = useUser();
@@ -41,10 +51,38 @@ export default function RequestsPage() {
     }
   };
 
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high':
+        return 'text-red-500 bg-red-500/10';
+      case 'medium':
+        return 'text-yellow-500 bg-yellow-500/10';
+      case 'low':
+        return 'text-green-500 bg-green-500/10';
+      default:
+        return 'text-gray-500 bg-gray-500/10';
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'new':
+        return 'text-blue-500 bg-blue-500/10';
+      case 'in_progress':
+        return 'text-yellow-500 bg-yellow-500/10';
+      case 'resolved':
+        return 'text-green-500 bg-green-500/10';
+      case 'closed':
+        return 'text-gray-500 bg-gray-500/10';
+      default:
+        return 'text-gray-500 bg-gray-500/10';
+    }
+  };
+
   if (loading || isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-tg-theme-bg">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
       </div>
     );
   }
@@ -54,50 +92,70 @@ export default function RequestsPage() {
       {/* Верхня панель */}
       <div className="bg-tg-theme-section p-4 flex justify-between items-center safe-top">
         <div className="text-lg font-medium">Запити</div>
-        <button 
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => router.push('/requests/new')}
-          className="p-2 rounded-full bg-tg-theme-button"
+          className="text-blue-500"
         >
-          <span className="text-xl">➕</span>
-        </button>
+          <Plus className="h-5 w-5" />
+        </Button>
       </div>
 
       {/* Список запитів */}
       <div className="p-4">
-        <div className="space-y-4">
+        <div className="space-y-3">
           {requests.length === 0 ? (
-            <div className="bg-tg-theme-section rounded-xl p-4">
-              <p className="text-tg-theme-hint text-center py-8">
-                У вас поки немає запитів
-              </p>
+            <div className="bg-tg-theme-section rounded-xl p-8">
+              <div className="text-center space-y-3">
+                <MessageCircle className="h-8 w-8 mx-auto text-tg-theme-hint" />
+                <p className="text-tg-theme-hint">
+                  У вас поки немає запитів
+                </p>
+                <Button
+                  onClick={() => router.push('/requests/new')}
+                  className="bg-blue-500 hover:bg-blue-600"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Створити запит
+                </Button>
+              </div>
             </div>
           ) : (
             requests.map((request) => (
               <button
                 key={request.id}
                 onClick={() => router.push(`/requests/${request.id}`)}
-                className="w-full bg-tg-theme-section rounded-xl p-4 text-left"
+                className="w-full bg-tg-theme-section rounded-xl p-4 text-left transition-all hover:bg-tg-theme-button"
               >
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-medium">{request.title}</h3>
-                  <span className={`text-xs px-2 py-1 rounded ${
-                    request.priority === 'high' 
-                      ? 'bg-red-500' 
-                      : request.priority === 'medium'
-                      ? 'bg-yellow-500'
-                      : 'bg-green-500'
-                  }`}>
-                    {request.priority}
+                  <h3 className="font-medium line-clamp-1">{request.title}</h3>
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(request.priority)}`}>
+                    <AlertCircle className="w-3 h-3 mr-1" />
+                    {request.priority === 'low' ? 'Низький' : 
+                     request.priority === 'medium' ? 'Середній' : 'Високий'}
                   </span>
                 </div>
-                <p className="text-sm text-tg-theme-hint line-clamp-2">
+                
+                <p className="text-sm text-tg-theme-hint line-clamp-2 mb-3">
                   {request.description}
                 </p>
-                <div className="flex justify-between items-center mt-2 text-xs text-tg-theme-hint">
-                  <span>
+
+                <Separator className="my-3 bg-tg-theme-button" />
+
+                <div className="flex justify-between items-center text-xs">
+                  <div className="flex items-center text-tg-theme-hint">
+                    <Clock className="w-3 h-3 mr-1" />
                     {new Date(request.created_at).toLocaleDateString()}
-                  </span>
-                  <span className="capitalize">{request.status}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full ${getStatusColor(request.status)}`}>
+                      {request.status === 'new' ? 'Новий' :
+                       request.status === 'in_progress' ? 'В роботі' :
+                       request.status === 'resolved' ? 'Вирішено' : 'Закрито'}
+                    </span>
+                    <ChevronRight className="w-4 h-4 ml-2 text-tg-theme-hint" />
+                  </div>
                 </div>
               </button>
             ))
@@ -107,15 +165,15 @@ export default function RequestsPage() {
 
       {/* Нижня навігація */}
       <div className="fixed bottom-0 left-0 right-0 bg-tg-theme-section p-4 flex justify-around safe-bottom">
-        <button className="p-2 rounded-full bg-tg-theme-button">
+        <Button variant="ghost" size="icon" className="text-tg-theme-hint">
           <span className="text-xl">🏠</span>
-        </button>
-        <button className="p-2 rounded-full bg-tg-theme-button">
+        </Button>
+        <Button variant="ghost" size="icon" className="text-blue-500">
           <span className="text-xl">⚡</span>
-        </button>
-        <button className="p-2 rounded-full bg-tg-theme-button">
+        </Button>
+        <Button variant="ghost" size="icon" className="text-tg-theme-hint">
           <span className="text-xl">⚙️</span>
-        </button>
+        </Button>
       </div>
     </div>
   );
