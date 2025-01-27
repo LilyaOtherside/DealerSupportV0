@@ -13,7 +13,9 @@ import {
   AlertCircle,
   MessageCircle,
   ChevronRight,
-  Loader2
+  Loader2,
+  Filter,
+  Search
 } from 'lucide-react';
 
 export default function RequestsPage() {
@@ -88,29 +90,53 @@ export default function RequestsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-tg-theme-bg text-white">
+    <div className="min-h-screen bg-gradient-to-b from-tg-theme-bg to-tg-theme-section text-white">
       {/* Верхня панель */}
-      <div className="bg-tg-theme-section p-4 flex justify-between items-center safe-top">
-        <div className="text-lg font-medium">Запити</div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.push('/requests/new')}
-          className="text-blue-500"
-        >
-          <Plus className="h-5 w-5" />
-        </Button>
+      <div className="bg-tg-theme-bg/80 backdrop-blur-lg p-4 sticky top-0 z-10 safe-top">
+        <div className="flex justify-between items-center mb-4">
+          <div className="text-xl font-semibold">Запити</div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.push('/requests/new')}
+            className="text-blue-500 hover:bg-blue-500/10"
+          >
+            <Plus className="h-5 w-5" />
+          </Button>
+        </div>
+
+        {/* Пошук та фільтри */}
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-tg-theme-hint" />
+            <input
+              type="text"
+              placeholder="Пошук запитів..."
+              className="w-full bg-tg-theme-section/50 rounded-full pl-10 pr-4 py-2 text-sm placeholder:text-tg-theme-hint focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+            />
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full bg-tg-theme-section/50 hover:bg-tg-theme-section"
+          >
+            <Filter className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       {/* Список запитів */}
-      <div className="p-4">
-        <div className="space-y-3">
-          {requests.length === 0 ? (
-            <div className="bg-tg-theme-section rounded-xl p-8">
-              <div className="text-center space-y-3">
-                <MessageCircle className="h-8 w-8 mx-auto text-tg-theme-hint" />
-                <p className="text-tg-theme-hint">
-                  У вас поки немає запитів
+      <div className="p-4 space-y-4">
+        {requests.length === 0 ? (
+          <div className="bg-tg-theme-section/50 backdrop-blur-lg rounded-2xl p-8">
+            <div className="text-center space-y-4">
+              <div className="bg-blue-500/10 rounded-full p-4 w-fit mx-auto">
+                <MessageCircle className="h-8 w-8 text-blue-500" />
+              </div>
+              <div>
+                <p className="text-lg font-medium mb-1">Немає запитів</p>
+                <p className="text-tg-theme-hint text-sm mb-4">
+                  Створіть свій перший запит для підтримки
                 </p>
                 <Button
                   onClick={() => router.push('/requests/new')}
@@ -121,57 +147,102 @@ export default function RequestsPage() {
                 </Button>
               </div>
             </div>
-          ) : (
-            requests.map((request) => (
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {requests.map((request) => (
               <button
                 key={request.id}
                 onClick={() => router.push(`/requests/${request.id}`)}
-                className="w-full bg-tg-theme-section rounded-xl p-4 text-left transition-all hover:bg-tg-theme-button"
+                className="w-full bg-tg-theme-section/50 backdrop-blur-lg rounded-2xl p-4 text-left transition-all hover:bg-tg-theme-section hover:scale-[1.02] active:scale-[0.98]"
               >
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-medium line-clamp-1">{request.title}</h3>
-                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(request.priority)}`}>
+                <div className="flex justify-between items-start gap-4">
+                  <div className="flex-1">
+                    <h3 className="font-medium line-clamp-1 mb-1">{request.title}</h3>
+                    <p className="text-sm text-tg-theme-hint line-clamp-2 mb-3">
+                      {request.description}
+                    </p>
+                  </div>
+                  <span className={`shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                    request.priority === 'high' 
+                      ? 'bg-red-500/10 text-red-500' 
+                      : request.priority === 'medium'
+                      ? 'bg-yellow-500/10 text-yellow-500'
+                      : 'bg-green-500/10 text-green-500'
+                  }`}>
                     <AlertCircle className="w-3 h-3 mr-1" />
                     {request.priority === 'low' ? 'Низький' : 
                      request.priority === 'medium' ? 'Середній' : 'Високий'}
                   </span>
                 </div>
-                
-                <p className="text-sm text-tg-theme-hint line-clamp-2 mb-3">
-                  {request.description}
-                </p>
 
-                <Separator className="my-3 bg-tg-theme-button" />
+                <Separator className="my-3 bg-tg-theme-button/50" />
 
                 <div className="flex justify-between items-center text-xs">
                   <div className="flex items-center text-tg-theme-hint">
                     <Clock className="w-3 h-3 mr-1" />
                     {new Date(request.created_at).toLocaleDateString()}
                   </div>
-                  <div className="flex items-center">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full ${getStatusColor(request.status)}`}>
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full ${
+                      request.status === 'new' 
+                        ? 'bg-blue-500/10 text-blue-500'
+                        : request.status === 'in_progress'
+                        ? 'bg-yellow-500/10 text-yellow-500'
+                        : request.status === 'resolved'
+                        ? 'bg-green-500/10 text-green-500'
+                        : 'bg-gray-500/10 text-gray-500'
+                    }`}>
                       {request.status === 'new' ? 'Новий' :
                        request.status === 'in_progress' ? 'В роботі' :
                        request.status === 'resolved' ? 'Вирішено' : 'Закрито'}
                     </span>
-                    <ChevronRight className="w-4 h-4 ml-2 text-tg-theme-hint" />
+                    <ChevronRight className="w-4 h-4 text-tg-theme-hint" />
                   </div>
                 </div>
+
+                {request.media_urls.length > 0 && (
+                  <div className="flex gap-1 mt-3">
+                    {request.media_urls.slice(0, 3).map((media, index) => (
+                      <div
+                        key={index}
+                        className="w-12 h-12 rounded-lg bg-tg-theme-button/50 flex items-center justify-center overflow-hidden"
+                      >
+                        {media.type === 'image' ? (
+                          <img
+                            src={media.url}
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-lg">
+                            {media.type === 'video' ? '🎥' : '📄'}
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                    {request.media_urls.length > 3 && (
+                      <div className="w-12 h-12 rounded-lg bg-tg-theme-button/50 flex items-center justify-center text-sm text-tg-theme-hint">
+                        +{request.media_urls.length - 3}
+                      </div>
+                    )}
+                  </div>
+                )}
               </button>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Нижня навігація */}
-      <div className="fixed bottom-0 left-0 right-0 bg-tg-theme-section p-4 flex justify-around safe-bottom">
-        <Button variant="ghost" size="icon" className="text-tg-theme-hint">
+      <div className="fixed bottom-0 left-0 right-0 bg-tg-theme-bg/80 backdrop-blur-lg p-4 flex justify-around safe-bottom">
+        <Button variant="ghost" size="icon" className="text-tg-theme-hint hover:text-white hover:bg-tg-theme-button">
           <span className="text-xl">🏠</span>
         </Button>
-        <Button variant="ghost" size="icon" className="text-blue-500">
+        <Button variant="ghost" size="icon" className="text-blue-500 hover:bg-blue-500/10">
           <span className="text-xl">⚡</span>
         </Button>
-        <Button variant="ghost" size="icon" className="text-tg-theme-hint">
+        <Button variant="ghost" size="icon" className="text-tg-theme-hint hover:text-white hover:bg-tg-theme-button">
           <span className="text-xl">⚙️</span>
         </Button>
       </div>

@@ -153,60 +153,62 @@ export default function RequestPage({ params }: { params: { id: string } }) {
   }
 
   return (
-    <div className="min-h-screen bg-tg-theme-bg text-white">
+    <div className="min-h-screen bg-gradient-to-b from-tg-theme-bg to-tg-theme-section text-white">
       {/* Верхня панель */}
-      <div className="bg-tg-theme-section p-4 flex justify-between items-center safe-top">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => router.back()}
-          className="text-tg-theme-hint"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="text-lg font-medium">
-          {isEditing ? 'Редагування' : 'Перегляд запиту'}
+      <div className="bg-tg-theme-bg/80 backdrop-blur-lg p-4 sticky top-0 z-10 safe-top">
+        <div className="flex justify-between items-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.back()}
+            className="text-tg-theme-hint hover:bg-tg-theme-button/50"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div className="text-xl font-semibold">
+            {isEditing ? 'Редагування' : 'Перегляд запиту'}
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => isEditing ? handleUpdate() : setIsEditing(true)}
+            className="text-blue-500 hover:bg-blue-500/10"
+          >
+            {isEditing ? <Save className="h-5 w-5" /> : <Edit className="h-5 w-5" />}
+          </Button>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => isEditing ? handleUpdate() : setIsEditing(true)}
-          className="text-blue-500"
-        >
-          {isEditing ? <Save className="h-5 w-5" /> : <Edit className="h-5 w-5" />}
-        </Button>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-6">
         {isEditing ? (
           // Форма редагування
-          <>
+          <div className="space-y-4">
             <div>
-              <label className="block text-sm text-tg-theme-hint mb-2">
+              <label className="block text-sm font-medium mb-1.5">
                 Тема запиту
               </label>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="bg-tg-theme-section border-0"
+                className="bg-tg-theme-section/50 backdrop-blur-sm border-0 focus:ring-2 focus:ring-blue-500/50"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm text-tg-theme-hint mb-2">
+              <label className="block text-sm font-medium mb-1.5">
                 Опис проблеми
               </label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="bg-tg-theme-section border-0 min-h-[120px]"
+                className="bg-tg-theme-section/50 backdrop-blur-sm border-0 min-h-[120px] focus:ring-2 focus:ring-blue-500/50"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm text-tg-theme-hint mb-2">
+              <label className="block text-sm font-medium mb-1.5">
                 Пріоритет
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -215,51 +217,85 @@ export default function RequestPage({ params }: { params: { id: string } }) {
                     key={p}
                     variant={priority === p ? "default" : "secondary"}
                     onClick={() => setPriority(p)}
-                    className={priority === p ? "" : "bg-tg-theme-section"}
+                    className={`
+                      transition-all duration-200
+                      ${priority === p 
+                        ? p === 'high'
+                          ? 'bg-red-500 hover:bg-red-600'
+                          : p === 'medium'
+                          ? 'bg-yellow-500 hover:bg-yellow-600'
+                          : 'bg-green-500 hover:bg-green-600'
+                        : 'bg-tg-theme-section/50 hover:bg-tg-theme-section'
+                      }
+                    `}
                   >
                     {p === 'low' ? 'Низький' : p === 'medium' ? 'Середній' : 'Високий'}
                   </Button>
                 ))}
               </div>
             </div>
-          </>
+          </div>
         ) : (
           // Перегляд запиту
-          <>
-            <div className="flex justify-between items-start">
-              <h1 className="text-xl font-medium">{request.title}</h1>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                request.priority === 'high' 
-                  ? 'bg-red-500/10 text-red-500' 
-                  : request.priority === 'medium'
-                  ? 'bg-yellow-500/10 text-yellow-500'
-                  : 'bg-green-500/10 text-green-500'
-              }`}>
-                <AlertCircle className="w-3 h-3 mr-1" />
-                {request.priority === 'low' ? 'Низький' : 
-                 request.priority === 'medium' ? 'Середній' : 'Високий'}
-              </span>
+          <div className="space-y-6">
+            <div className="bg-tg-theme-section/50 backdrop-blur-sm rounded-2xl p-4 space-y-4">
+              <div className="flex justify-between items-start gap-4">
+                <h1 className="text-xl font-semibold">{request.title}</h1>
+                <span className={`shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                  request.priority === 'high' 
+                    ? 'bg-red-500/10 text-red-500' 
+                    : request.priority === 'medium'
+                    ? 'bg-yellow-500/10 text-yellow-500'
+                    : 'bg-green-500/10 text-green-500'
+                }`}>
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                  {request.priority === 'low' ? 'Низький' : 
+                   request.priority === 'medium' ? 'Середній' : 'Високий'}
+                </span>
+              </div>
+
+              <Separator className="bg-tg-theme-button/50" />
+
+              <p className="text-tg-theme-hint leading-relaxed">{request.description}</p>
+
+              <div className="flex justify-between items-center text-sm">
+                <div className="flex items-center text-tg-theme-hint">
+                  <Clock className="w-4 h-4 mr-1" />
+                  {new Date(request.created_at).toLocaleDateString()}
+                </div>
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                  request.status === 'new' 
+                    ? 'bg-blue-500/10 text-blue-500'
+                    : request.status === 'in_progress'
+                    ? 'bg-yellow-500/10 text-yellow-500'
+                    : request.status === 'resolved'
+                    ? 'bg-green-500/10 text-green-500'
+                    : 'bg-gray-500/10 text-gray-500'
+                }`}>
+                  {request.status === 'new' ? 'Новий' :
+                   request.status === 'in_progress' ? 'В роботі' :
+                   request.status === 'resolved' ? 'Вирішено' : 'Закрито'}
+                </span>
+              </div>
             </div>
 
-            <Separator className="bg-tg-theme-section" />
-
-            <p className="text-tg-theme-hint">{request.description}</p>
-
             {request.media_urls.length > 0 && (
-              <div className="space-y-2">
-                <h2 className="text-sm text-tg-theme-hint">Медіа файли:</h2>
-                <div className="grid grid-cols-3 gap-2">
+              <div className="space-y-3">
+                <h2 className="text-lg font-medium">Медіа файли</h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {request.media_urls.map((media, index) => (
-                    <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
+                    <div key={index} className="relative aspect-square group">
                       {media.type === 'image' ? (
-                        <Image
-                          src={media.url}
-                          alt="Media"
-                          fill
-                          className="object-cover transition-transform hover:scale-105"
-                        />
+                        <div className="relative w-full h-full rounded-xl overflow-hidden">
+                          <Image
+                            src={media.url}
+                            alt="Media"
+                            fill
+                            className="object-cover transition-transform group-hover:scale-105"
+                          />
+                        </div>
                       ) : (
-                        <div className="w-full h-full bg-tg-theme-section rounded-lg flex items-center justify-center">
+                        <div className="w-full h-full bg-tg-theme-section/50 backdrop-blur-sm rounded-xl flex items-center justify-center">
                           {media.type === 'video' ? '🎥' : '📄'}
                         </div>
                       )}
@@ -269,50 +305,40 @@ export default function RequestPage({ params }: { params: { id: string } }) {
               </div>
             )}
 
-            <Separator className="bg-tg-theme-section" />
-
-            <div className="flex justify-between text-sm text-tg-theme-hint">
-              <span className="flex items-center">
-                <Clock className="w-4 h-4 mr-1" />
-                {new Date(request.created_at).toLocaleDateString()}
-              </span>
-              <span className="capitalize">{request.status}</span>
-            </div>
-          </>
-        )}
-
-        {!isEditing && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="destructive"
-                className="w-full mt-4"
-                disabled={isDeleting}
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                {isDeleting ? 'Видалення...' : 'Видалити запит'}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent className="bg-tg-theme-bg border-tg-theme-section">
-              <AlertDialogHeader>
-                <AlertDialogTitle>Видалити запит?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Ця дія не може бути скасована. Запит буде видалено назавжди.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel className="bg-tg-theme-section border-0">
-                  Скасувати
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDelete}
-                  className="bg-red-500 hover:bg-red-600"
-                >
-                  Видалити
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+            {!isEditing && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    className="w-full h-12 text-base font-medium"
+                    disabled={isDeleting}
+                  >
+                    <Trash2 className="w-5 h-5 mr-2" />
+                    {isDeleting ? 'Видалення...' : 'Видалити запит'}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="bg-tg-theme-bg/95 backdrop-blur-xl border-tg-theme-section">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-xl">Видалити запит?</AlertDialogTitle>
+                    <AlertDialogDescription className="text-tg-theme-hint">
+                      Ця дія не може бути скасована. Запит буде видалено назавжди.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="bg-tg-theme-section/50 border-0 hover:bg-tg-theme-section">
+                      Скасувати
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDelete}
+                      className="bg-red-500 hover:bg-red-600"
+                    >
+                      Видалити
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
         )}
       </div>
     </div>
