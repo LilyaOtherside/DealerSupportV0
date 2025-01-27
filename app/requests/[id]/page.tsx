@@ -6,6 +6,29 @@ import { useUser } from '@/lib/contexts/UserContext';
 import { supabase } from '@/lib/supabase';
 import { Request } from '@/app/types';
 import Image from 'next/image';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Separator } from "@/components/ui/separator";
+import { 
+  ArrowLeft, 
+  Edit, 
+  Save, 
+  Trash2,
+  Clock,
+  AlertCircle
+} from 'lucide-react';
 
 export default function RequestPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -133,21 +156,25 @@ export default function RequestPage({ params }: { params: { id: string } }) {
     <div className="min-h-screen bg-tg-theme-bg text-white">
       {/* Верхня панель */}
       <div className="bg-tg-theme-section p-4 flex justify-between items-center safe-top">
-        <button 
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => router.back()}
           className="text-tg-theme-hint"
         >
-          ← Назад
-        </button>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
         <div className="text-lg font-medium">
           {isEditing ? 'Редагування' : 'Перегляд запиту'}
         </div>
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => isEditing ? handleUpdate() : setIsEditing(true)}
           className="text-blue-500"
         >
-          {isEditing ? 'Зберегти' : 'Редагувати'}
-        </button>
+          {isEditing ? <Save className="h-5 w-5" /> : <Edit className="h-5 w-5" />}
+        </Button>
       </div>
 
       <div className="p-4 space-y-4">
@@ -158,11 +185,10 @@ export default function RequestPage({ params }: { params: { id: string } }) {
               <label className="block text-sm text-tg-theme-hint mb-2">
                 Тема запиту
               </label>
-              <input
-                type="text"
+              <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full p-3 bg-tg-theme-section rounded-lg text-white"
+                className="bg-tg-theme-section border-0"
                 required
               />
             </div>
@@ -171,10 +197,10 @@ export default function RequestPage({ params }: { params: { id: string } }) {
               <label className="block text-sm text-tg-theme-hint mb-2">
                 Опис проблеми
               </label>
-              <textarea
+              <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full p-3 bg-tg-theme-section rounded-lg text-white min-h-[120px]"
+                className="bg-tg-theme-section border-0 min-h-[120px]"
                 required
               />
             </div>
@@ -185,18 +211,14 @@ export default function RequestPage({ params }: { params: { id: string } }) {
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {(['low', 'medium', 'high'] as const).map((p) => (
-                  <button
+                  <Button
                     key={p}
-                    type="button"
+                    variant={priority === p ? "default" : "secondary"}
                     onClick={() => setPriority(p)}
-                    className={`p-2 rounded-lg ${
-                      priority === p 
-                        ? 'bg-blue-500 text-white' 
-                        : 'bg-tg-theme-section text-tg-theme-hint'
-                    }`}
+                    className={priority === p ? "" : "bg-tg-theme-section"}
                   >
                     {p === 'low' ? 'Низький' : p === 'medium' ? 'Середній' : 'Високий'}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -206,17 +228,20 @@ export default function RequestPage({ params }: { params: { id: string } }) {
           <>
             <div className="flex justify-between items-start">
               <h1 className="text-xl font-medium">{request.title}</h1>
-              <span className={`text-xs px-2 py-1 rounded ${
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                 request.priority === 'high' 
-                  ? 'bg-red-500' 
+                  ? 'bg-red-500/10 text-red-500' 
                   : request.priority === 'medium'
-                  ? 'bg-yellow-500'
-                  : 'bg-green-500'
+                  ? 'bg-yellow-500/10 text-yellow-500'
+                  : 'bg-green-500/10 text-green-500'
               }`}>
+                <AlertCircle className="w-3 h-3 mr-1" />
                 {request.priority === 'low' ? 'Низький' : 
                  request.priority === 'medium' ? 'Середній' : 'Високий'}
               </span>
             </div>
+
+            <Separator className="bg-tg-theme-section" />
 
             <p className="text-tg-theme-hint">{request.description}</p>
 
@@ -225,13 +250,13 @@ export default function RequestPage({ params }: { params: { id: string } }) {
                 <h2 className="text-sm text-tg-theme-hint">Медіа файли:</h2>
                 <div className="grid grid-cols-3 gap-2">
                   {request.media_urls.map((media, index) => (
-                    <div key={index} className="relative aspect-square">
+                    <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
                       {media.type === 'image' ? (
                         <Image
                           src={media.url}
                           alt="Media"
                           fill
-                          className="object-cover rounded-lg"
+                          className="object-cover transition-transform hover:scale-105"
                         />
                       ) : (
                         <div className="w-full h-full bg-tg-theme-section rounded-lg flex items-center justify-center">
@@ -244,21 +269,50 @@ export default function RequestPage({ params }: { params: { id: string } }) {
               </div>
             )}
 
+            <Separator className="bg-tg-theme-section" />
+
             <div className="flex justify-between text-sm text-tg-theme-hint">
-              <span>Створено: {new Date(request.created_at).toLocaleDateString()}</span>
-              <span>Статус: {request.status}</span>
+              <span className="flex items-center">
+                <Clock className="w-4 h-4 mr-1" />
+                {new Date(request.created_at).toLocaleDateString()}
+              </span>
+              <span className="capitalize">{request.status}</span>
             </div>
           </>
         )}
 
         {!isEditing && (
-          <button
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="w-full p-4 mt-4 rounded-lg bg-red-500 text-white font-medium"
-          >
-            {isDeleting ? 'Видалення...' : 'Видалити запит'}
-          </button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="destructive"
+                className="w-full mt-4"
+                disabled={isDeleting}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                {isDeleting ? 'Видалення...' : 'Видалити запит'}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="bg-tg-theme-bg border-tg-theme-section">
+              <AlertDialogHeader>
+                <AlertDialogTitle>Видалити запит?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Ця дія не може бути скасована. Запит буде видалено назавжди.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="bg-tg-theme-section border-0">
+                  Скасувати
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  className="bg-red-500 hover:bg-red-600"
+                >
+                  Видалити
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
       </div>
     </div>
