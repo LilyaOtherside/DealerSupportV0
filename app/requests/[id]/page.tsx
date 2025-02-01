@@ -304,40 +304,6 @@ export default function RequestPage({ params }: { params: { id: string } }) {
                 </div>
               </div>
             )}
-
-            {!isEditing && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="destructive"
-                    className="w-full h-12 text-base font-medium"
-                    disabled={isDeleting}
-                  >
-                    <Trash2 className="w-5 h-5 mr-2" />
-                    {isDeleting ? 'Видалення...' : 'Видалити запит'}
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="bg-tg-theme-bg/95 backdrop-blur-xl border-tg-theme-section">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle className="text-xl">Видалити запит?</AlertDialogTitle>
-                    <AlertDialogDescription className="text-tg-theme-hint">
-                      Ця дія не може бути скасована. Запит буде видалено назавжди.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="bg-tg-theme-section/50 border-0 hover:bg-tg-theme-section">
-                      Скасувати
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleDelete}
-                      className="bg-red-500 hover:bg-red-600"
-                    >
-                      Видалити
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
           </div>
         )}
       </div>
