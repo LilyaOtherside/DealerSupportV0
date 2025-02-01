@@ -72,14 +72,16 @@ export default function NewRequestPage() {
   const uploadFile = async (file: File) => {
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random()}.${fileExt}`;
+      const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2)}`;
+      const fileName = `${uniqueId}.${fileExt}`;
       const filePath = `${user?.id}/${fileName}`;
 
       if (file.size > 10 * 1024 * 1024) {
         throw new Error('Файл занадто великий (максимум 10MB)');
       }
 
-      const { error: uploadError, data } = await supabase.storage
+      const { error: uploadError } = await supabase
+        .storage
         .from('request-media')
         .upload(filePath, file, {
           cacheControl: '3600',
@@ -88,11 +90,16 @@ export default function NewRequestPage() {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
+      const { data } = supabase
+        .storage
         .from('request-media')
         .getPublicUrl(filePath);
 
-      return publicUrl;
+      if (!data.publicUrl) {
+        throw new Error('Не вдалося отримати public URL для файлу');
+      }
+
+      return data.publicUrl;
     } catch (error) {
       console.error('Error in uploadFile:', error);
       throw error;
