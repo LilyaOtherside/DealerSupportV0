@@ -143,7 +143,15 @@ export default function NewRequestPage() {
       router.push('/requests');
     } catch (error) {
       console.error('Error in handleSubmit:', error);
-      alert(`Помилка при створенні запиту: ${error instanceof Error ? error.message : 'Невідома помилка'}`);
+      let errorMessage = 'Невідома помилка';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else {
+        errorMessage = JSON.stringify(error);
+      }
+      alert(`Помилка при створенні запиту: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
       setUploadProgress(0);
