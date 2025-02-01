@@ -14,6 +14,10 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         )}
         ref={ref}
         {...props}
+        onInvalid={(e) =>
+          e.currentTarget.setCustomValidity("Будь ласка, заповніть це поле")
+        }
+        onInput={(e) => e.currentTarget.setCustomValidity("")}
       />
     )
   }

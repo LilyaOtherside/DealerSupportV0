@@ -15,6 +15,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         ref={ref}
         {...props}
+        onInvalid={(e) =>
+          e.currentTarget.setCustomValidity("Будь ласка, заповніть це поле")
+        }
+        onInput={(e) => e.currentTarget.setCustomValidity("")}
       />
     )
   }
