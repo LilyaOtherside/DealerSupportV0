@@ -224,7 +224,7 @@ export default function NewRequestPage() {
                         : p === 'medium'
                         ? 'bg-yellow-500 hover:bg-yellow-600'
                         : 'bg-green-500 hover:bg-green-600'
-                      : 'bg-tg-theme-section/50 hover:bg-tg-theme-section'
+                      : 'bg-tg-theme-section/50 hover:bg-tg-theme-section text-white'
                     }
                   `}
                 >
