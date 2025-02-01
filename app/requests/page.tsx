@@ -115,8 +115,8 @@ export default function RequestsPage() {
           </Button>
         </div>
 
-        {/* Пошук та фільтри */}
-        <div className="flex gap-2 mb-4">
+        {/* Пошук та сортування за статусом */}
+        <div className="flex items-center gap-2 mb-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-tg-theme-hint" />
             <input
@@ -127,25 +127,22 @@ export default function RequestsPage() {
               className="w-full bg-tg-theme-section/50 rounded-full pl-10 pr-4 py-2 text-sm placeholder:text-tg-theme-hint focus:outline-none focus:ring-2 focus:ring-blue-500/50"
             />
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full bg-tg-theme-section/50 hover:bg-tg-theme-section"
-          >
-            <Filter className="h-4 w-4" />
-          </Button>
-        </div>
-        <div className="flex gap-2 mb-4">
-          {(["all", "new", "in_progress", "resolved", "closed"] as const).map((status) => (
-            <Button
-              key={status}
-              variant={filterStatus === status ? "default" : "outline"}
-              onClick={() => setFilterStatus(status)}
-              className="text-sm"
+          <div className="relative">
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="appearance-none bg-tg-theme-section/50 rounded-full pl-3 pr-8 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
             >
-              {status === "all" ? "Всі" : status === "new" ? "Новий" : status === "in_progress" ? "В роботі" : status === "resolved" ? "Вирішено" : "Закрито"}
-            </Button>
-          ))}
+              <option value="all">Всі</option>
+              <option value="new">Новий</option>
+              <option value="in_progress">В роботі</option>
+              <option value="resolved">Вирішено</option>
+              <option value="closed">Закрито</option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+              <Filter className="h-4 w-4 text-tg-theme-hint" />
+            </div>
+          </div>
         </div>
       </div>
 
