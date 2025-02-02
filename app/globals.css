@@ -99,10 +99,12 @@ body {
 
   .nav-button {
     @apply relative transition-all duration-500 ease-in-out rounded-2xl p-2;
+    color: rgb(var(--tg-theme-hint));
   }
 
   .nav-button:hover {
     @apply scale-110;
+    color: rgb(var(--tg-theme-text));
   }
 
   .nav-button:active {
@@ -113,14 +115,6 @@ body {
     @apply px-4;
     color: rgb(var(--tg-theme-text));
     background-color: rgb(var(--tg-theme-button));
-  }
-
-  .nav-button:not(.active) {
-    color: rgb(var(--tg-theme-hint));
-  }
-
-  .nav-button:not(.active):hover {
-    color: rgb(var(--tg-theme-text));
   }
 }
 
