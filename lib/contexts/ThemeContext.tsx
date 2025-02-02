@@ -14,28 +14,38 @@ const ThemeContext = createContext<ThemeContextType>({
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [isDark, setIsDark] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
+  // Ініціалізація теми
   useEffect(() => {
-    const theme = localStorage.getItem('theme');
-    if (theme === 'light') {
+    setMounted(true);
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
       setIsDark(false);
       document.documentElement.classList.add('light-theme');
     }
   }, []);
 
   const toggleTheme = () => {
-    setIsDark(prev => {
-      const newTheme = !prev;
-      if (newTheme) {
-        localStorage.setItem('theme', 'dark');
-        document.documentElement.classList.remove('light-theme');
-      } else {
-        localStorage.setItem('theme', 'light');
-        document.documentElement.classList.add('light-theme');
-      }
-      return newTheme;
-    });
+    const newTheme = !isDark;
+    setIsDark(newTheme);
+    
+    if (newTheme) {
+      // Темна тема
+      localStorage.setItem('theme', 'dark');
+      document.documentElement.classList.remove('light-theme');
+      document.body.style.backgroundColor = 'rgb(15, 15, 15)';
+    } else {
+      // Світла тема
+      localStorage.setItem('theme', 'light');
+      document.documentElement.classList.add('light-theme');
+      document.body.style.backgroundColor = 'rgb(248, 250, 252)';
+    }
   };
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <ThemeContext.Provider value={{ isDark, toggleTheme }}>

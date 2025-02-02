@@ -12,7 +12,7 @@
   --tg-theme-hover: 44 44 44;
 }
 
-html.light-theme {
+:root.light-theme {
   /* Світла тема */
   --tg-theme-bg: 248 250 252;
   --tg-theme-section: 241 245 249;
@@ -22,11 +22,14 @@ html.light-theme {
   --tg-theme-hover: 226 232 240;
 }
 
-body {
-  background-color: rgb(var(--tg-theme-bg));
-  color: rgb(var(--tg-theme-text));
-  -webkit-tap-highlight-color: transparent;
-  overscroll-behavior: none;
+@layer base {
+  body {
+    @apply transition-colors duration-200;
+    background-color: rgb(var(--tg-theme-bg));
+    color: rgb(var(--tg-theme-text));
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
 }
 
 @layer components {
