@@ -106,7 +106,7 @@ export default function RequestsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-tg-theme-bg to-tg-theme-section text-white pt-5">
+    <div className="min-h-screen bg-gradient-to-b from-tg-theme-bg to-tg-theme-section text-tg-theme-text pt-5">
       {/* Верхня панель */}
       <div className="bg-tg-theme-bg/80 backdrop-blur-lg p-4 sticky top-0 z-10 safe-top">
         <div className="flex justify-between items-center mb-4">

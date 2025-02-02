@@ -10,27 +10,30 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('theme');
-      return saved ? saved === 'dark' : true;
-    }
-    return true;
-  });
-
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('theme', !isDark ? 'dark' : 'light');
-    }
-    document.documentElement.classList.toggle('light-theme');
-  };
+  const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
-    if (!isDark) {
-      document.documentElement.classList.add('light-theme');
+    // Перевіряємо збережену тему при завантаженні
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) {
+      setIsDark(savedTheme === 'dark');
+      if (savedTheme === 'light') {
+        document.documentElement.classList.add('light-theme');
+      }
     }
   }, []);
+
+  const toggleTheme = () => {
+    const newTheme = !isDark;
+    setIsDark(newTheme);
+    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+    
+    if (newTheme) {
+      document.documentElement.classList.remove('light-theme');
+    } else {
+      document.documentElement.classList.add('light-theme');
+    }
+  };
 
   return (
     <ThemeContext.Provider value={{ isDark, toggleTheme }}>
