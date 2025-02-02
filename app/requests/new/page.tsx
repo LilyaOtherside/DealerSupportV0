@@ -108,13 +108,19 @@ export default function NewRequestPage() {
 
   const createRequest = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user?.id) {
+      console.log('User not authenticated:', user);
+      alert('Користувач не авторизований');
+      return;
+    }
+    console.log('Authenticated user:', user.id);
     setIsSubmitting(true);
 
     try {
       // Завантажуємо медіафайли
       const mediaUrls = await Promise.all(
         mediaFiles.map(async (file) => {
-          const fileName = `${user?.id}/${Date.now()}_${file.file.name}`;
+          const fileName = `${user.id}/${Date.now()}_${file.file.name}`;
           const { data, error } = await supabase.storage
             .from('request-media')
             .upload(fileName, file.file);
@@ -137,7 +143,7 @@ export default function NewRequestPage() {
         .from('requests')
         .insert([
           {
-            user_id: user?.id,
+            user_id: user.id,
             title,
             description,
             priority,
@@ -148,12 +154,25 @@ export default function NewRequestPage() {
         .select()
         .single();
 
+      console.log('Request data:', {
+        user_id: user.id,
+        title,
+        description,
+        priority,
+        status: 'new',
+        media_urls: mediaUrls
+      });
+
       if (error) throw error;
 
       router.push('/requests');
     } catch (error) {
       console.error('Error creating request:', error);
-      alert('Помилка при створенні запиту: ' + JSON.stringify(error));
+      if (error instanceof Error) {
+        alert('Помилка при створенні запиту: ' + error.message);
+      } else {
+        alert('Помилка при створенні запиту: ' + JSON.stringify(error));
+      }
     } finally {
       setIsSubmitting(false);
     }
