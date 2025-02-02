@@ -16,30 +16,41 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [isDark, setIsDark] = useState(true);
   const [mounted, setMounted] = useState(false);
 
-  // Ініціалізація теми
+  // Встановлення початкової теми
   useEffect(() => {
     setMounted(true);
+    const root = document.documentElement;
     const savedTheme = localStorage.getItem('theme');
+    
     if (savedTheme === 'light') {
       setIsDark(false);
-      document.documentElement.classList.add('light-theme');
+      root.classList.add('light-theme');
+      document.body.style.backgroundColor = 'rgb(248, 250, 252)';
+      document.body.style.color = 'rgb(15, 23, 42)';
+    } else {
+      root.classList.remove('light-theme');
+      document.body.style.backgroundColor = 'rgb(15, 15, 15)';
+      document.body.style.color = 'rgb(255, 255, 255)';
     }
   }, []);
 
   const toggleTheme = () => {
+    const root = document.documentElement;
     const newTheme = !isDark;
     setIsDark(newTheme);
     
     if (newTheme) {
-      // Темна тема
+      // Перемикання на темну тему
       localStorage.setItem('theme', 'dark');
-      document.documentElement.classList.remove('light-theme');
+      root.classList.remove('light-theme');
       document.body.style.backgroundColor = 'rgb(15, 15, 15)';
+      document.body.style.color = 'rgb(255, 255, 255)';
     } else {
-      // Світла тема
+      // Перемикання на світлу тему
       localStorage.setItem('theme', 'light');
-      document.documentElement.classList.add('light-theme');
+      root.classList.add('light-theme');
       document.body.style.backgroundColor = 'rgb(248, 250, 252)';
+      document.body.style.color = 'rgb(15, 23, 42)';
     }
   };
 
