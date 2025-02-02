@@ -102,17 +102,9 @@ export default function RequestsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-tg-theme-bg to-tg-theme-section text-white">
       {/* Верхня панель */}
-      <div className="bg-tg-theme-bg/80 backdrop-blur-lg p-4 pt-10 sticky top-0 z-10 safe-top">
-        <div className="flex justify-between items-center mb-4">
+      <div className="bg-tg-theme-bg/80 backdrop-blur-lg p-4 sticky top-0 z-10 safe-top">
+        <div className="flex justify-center mb-4">
           <div className="text-xl font-semibold">Запити</div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.push('/requests/new')}
-            className="text-blue-500 hover:bg-blue-500/10"
-          >
-            <Plus className="h-5 w-5" />
-          </Button>
         </div>
 
         {/* Пошук та сортування за статусом */}
@@ -251,6 +243,16 @@ export default function RequestsPage() {
                 )}
               </button>
             ))}
+            <div className="flex justify-center mt-6">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => router.push('/requests/new')}
+                className="text-blue-500 hover:bg-blue-500/10 h-12 w-12"
+              >
+                <Plus className="h-6 w-6" />
+              </Button>
+            </div>
           </div>
         )}
       </div>
