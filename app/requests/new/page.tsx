@@ -123,7 +123,11 @@ export default function NewRequestPage() {
           const fileName = `${user.id}/${Date.now()}_${file.file.name}`;
           const { data, error } = await supabase.storage
             .from('request-media')
-            .upload(fileName, file.file);
+            .upload(fileName, file.file, {
+              upsert: false,
+              cacheControl: '3600',
+              contentType: file.file.type
+            });
 
           if (error) throw error;
 
@@ -151,7 +155,7 @@ export default function NewRequestPage() {
             media_urls: mediaUrls
           }
         ])
-        .select()
+        .select('*')
         .single();
 
       console.log('Request data:', {
@@ -163,7 +167,10 @@ export default function NewRequestPage() {
         media_urls: mediaUrls
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error details:', error);
+        throw error;
+      }
 
       router.push('/requests');
     } catch (error) {
