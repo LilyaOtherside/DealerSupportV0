@@ -24,6 +24,10 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 221.2 83.2% 53.3%;
     --radius: 0.5rem;
+    --tg-theme-bg: #0F0F0F;
+    --tg-theme-section: #1C1C1C;
+    --tg-theme-button: #2C2C2C;
+    --tg-theme-hint: #6B7280;
   }
 
   .dark {
@@ -46,6 +50,13 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
+  }
+
+  .light-theme {
+    --tg-theme-bg: #FFFFFF;
+    --tg-theme-section: #F3F4F6;
+    --tg-theme-button: #E5E7EB;
+    --tg-theme-hint: #6B7280;
   }
 }
 
@@ -81,4 +92,21 @@ body {
   .tg-icon-container {
     @apply w-10 h-10 bg-tg-theme-button rounded-full flex items-center justify-center;
   }
+}
+
+/* Використовуйте CSS змінні замість хардкодних кольорів */
+.bg-tg-theme-bg {
+  background-color: var(--tg-theme-bg);
+}
+
+.bg-tg-theme-section {
+  background-color: var(--tg-theme-section);
+}
+
+.bg-tg-theme-button {
+  background-color: var(--tg-theme-button);
+}
+
+.text-tg-theme-hint {
+  color: var(--tg-theme-hint);
 } 

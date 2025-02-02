@@ -17,12 +17,15 @@ import {
   Filter, 
   Search, 
   Sun, 
+  Moon,
   User2
 } from 'lucide-react';
 import { BottomNav } from "@/components/BottomNav";
+import { useTheme } from '@/lib/contexts/ThemeContext';
 
 export default function RequestsPage() {
   const { user, loading } = useUser();
+  const { isDark, toggleTheme } = useTheme();
   const router = useRouter();
   const [requests, setRequests] = useState<Request[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -94,10 +97,10 @@ export default function RequestsPage() {
     return matchesQuery && matchesStatus;
   });
 
-  if (loading || isLoading) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-tg-theme-bg">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500" />
       </div>
     );
   }
@@ -111,8 +114,13 @@ export default function RequestsPage() {
             variant="ghost"
             size="icon"
             className="rounded-full w-8 h-8 hover:bg-tg-theme-button/50"
+            onClick={toggleTheme}
           >
-            <Sun className="h-5 w-5 text-tg-theme-hint" />
+            {isDark ? (
+              <Sun className="h-5 w-5 text-tg-theme-hint" />
+            ) : (
+              <Moon className="h-5 w-5 text-tg-theme-hint" />
+            )}
           </Button>
           <div className="text-xl font-semibold">Запити</div>
           <Button
