@@ -19,6 +19,7 @@ import {
   Sun, 
   User2
 } from 'lucide-react';
+import { BottomNav } from "@/components/BottomNav";
 
 export default function RequestsPage() {
   const { user, loading } = useUser();
@@ -282,18 +283,7 @@ export default function RequestsPage() {
         )}
       </div>
 
-      {/* Нижня навігація */}
-      <div className="fixed bottom-0 left-0 right-0 bg-tg-theme-bg/80 backdrop-blur-lg p-4 flex justify-around safe-bottom">
-        <Button variant="ghost" size="icon" className="text-tg-theme-hint hover:text-white hover:bg-tg-theme-button">
-          <span className="text-xl">🏠</span>
-        </Button>
-        <Button variant="ghost" size="icon" className="text-blue-500 hover:bg-blue-500/10">
-          <span className="text-xl">⚡</span>
-        </Button>
-        <Button variant="ghost" size="icon" className="text-tg-theme-hint hover:text-white hover:bg-tg-theme-button">
-          <span className="text-xl">⚙️</span>
-        </Button>
-      </div>
+      <BottomNav />
     </div>
   );
 } 

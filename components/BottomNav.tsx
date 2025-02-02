@@ -1,0 +1,58 @@
+'use client';
+
+import React, { useState } from "react";
+import { Archive, Plus, Settings } from "lucide-react";
+
+export const BottomNav = () => {
+  const [activeIcon, setActiveIcon] = useState("plus");
+  
+  return (
+    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center bg-black/80 backdrop-blur-lg rounded-full px-6 py-4 gap-12">
+      <button
+        onClick={() => setActiveIcon("archive")}
+        className={`relative transition-all duration-500 ease-in-out rounded-2xl p-2 hover:scale-110 active:scale-95 ${
+          activeIcon === "archive" 
+            ? "text-white bg-gray-800/50 scale-110 px-6" 
+            : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+        }`}
+      >
+        <Archive
+          size={24}
+          className={`transform transition-all duration-500 ${
+            activeIcon === "archive" ? "rotate-12" : "hover:rotate-12"
+          }`}
+        />
+      </button>
+      <button
+        onClick={() => setActiveIcon("plus")}
+        className={`relative transition-all duration-500 ease-in-out rounded-2xl p-2 hover:scale-110 active:scale-95 ${
+          activeIcon === "plus" 
+            ? "text-white bg-gray-800/50 scale-110 px-6" 
+            : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+        }`}
+      >
+        <Plus
+          size={28}
+          className={`transform transition-all duration-500 ${
+            activeIcon === "plus" ? "rotate-180" : "hover:rotate-180"
+          }`}
+        />
+      </button>
+      <button
+        onClick={() => setActiveIcon("settings")}
+        className={`relative transition-all duration-500 ease-in-out rounded-2xl p-2 hover:scale-110 active:scale-95 ${
+          activeIcon === "settings" 
+            ? "text-white bg-gray-800/50 scale-110 px-6" 
+            : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+        }`}
+      >
+        <Settings
+          size={24}
+          className={`transform transition-all duration-500 ${
+            activeIcon === "settings" ? "rotate-45" : "hover:rotate-45"
+          }`}
+        />
+      </button>
+    </nav>
+  );
+}; 
