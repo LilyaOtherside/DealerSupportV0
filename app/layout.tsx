@@ -20,7 +20,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="uk" className="dark">
+    <html lang="uk">
       <head>
         <script src="https://telegram.org/js/telegram-web-app.js" />
       </head>

@@ -3,29 +3,27 @@
 @tailwind utilities;
 
 :root {
-  /* Темна тема */
+  /* Темна тема за замовчуванням */
   --tg-theme-bg: 15 15 15;
   --tg-theme-section: 28 28 28;
   --tg-theme-button: 44 44 44;
   --tg-theme-hint: 107 114 128;
   --tg-theme-text: 255 255 255;
-  --tg-theme-overlay: 0 0 0;
   --tg-theme-hover: 44 44 44;
 }
 
 html.light-theme {
   /* Світла тема */
-  --tg-theme-bg: 255 255 255;
+  --tg-theme-bg: 248 250 252;
   --tg-theme-section: 241 245 249;
   --tg-theme-button: 226 232 240;
   --tg-theme-hint: 100 116 139;
   --tg-theme-text: 15 23 42;
-  --tg-theme-overlay: 255 255 255;
   --tg-theme-hover: 226 232 240;
 }
 
 body {
-  background: rgb(var(--tg-theme-bg));
+  background-color: rgb(var(--tg-theme-bg));
   color: rgb(var(--tg-theme-text));
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior: none;
@@ -52,6 +50,7 @@ body {
     color: rgb(var(--tg-theme-text));
   }
 
+  /* Градієнти */
   .from-tg-theme-bg {
     --tw-gradient-from: rgb(var(--tg-theme-bg));
     --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(var(--tg-theme-bg) / 0));
@@ -61,6 +60,7 @@ body {
     --tw-gradient-to: rgb(var(--tg-theme-section));
   }
 
+  /* Прозорість */
   .bg-tg-theme-bg\/80 {
     background-color: rgb(var(--tg-theme-bg) / 0.8);
   }
@@ -73,6 +73,7 @@ body {
     background-color: rgb(var(--tg-theme-button) / 0.5);
   }
 
+  /* Кнопки */
   .tg-button {
     @apply w-full p-4 rounded-xl flex items-center justify-between transition-all;
     background-color: rgb(var(--tg-theme-section));
@@ -90,6 +91,7 @@ body {
     background-color: rgb(var(--tg-theme-button));
   }
 
+  /* Навігація */
   .bottom-nav {
     @apply fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center rounded-full px-4 py-3 gap-8;
     background-color: rgb(var(--tg-theme-section));
