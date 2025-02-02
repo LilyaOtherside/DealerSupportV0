@@ -31,87 +31,97 @@ body {
   overscroll-behavior: none;
 }
 
-/* Компоненти */
-.bg-tg-theme-bg {
-  background-color: rgb(var(--tg-theme-bg));
-}
+@layer components {
+  .bg-tg-theme-bg {
+    background-color: rgb(var(--tg-theme-bg));
+  }
 
-.bg-tg-theme-section {
-  background-color: rgb(var(--tg-theme-section));
-}
+  .bg-tg-theme-section {
+    background-color: rgb(var(--tg-theme-section));
+  }
 
-.bg-tg-theme-button {
-  background-color: rgb(var(--tg-theme-button));
-}
+  .bg-tg-theme-button {
+    background-color: rgb(var(--tg-theme-button));
+  }
 
-.text-tg-theme-hint {
-  color: rgb(var(--tg-theme-hint));
-}
+  .text-tg-theme-hint {
+    color: rgb(var(--tg-theme-hint));
+  }
 
-.text-tg-theme-text {
-  color: rgb(var(--tg-theme-text));
-}
+  .text-tg-theme-text {
+    color: rgb(var(--tg-theme-text));
+  }
 
-/* Градієнти */
-.from-tg-theme-bg {
-  --tw-gradient-from: rgb(var(--tg-theme-bg));
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(var(--tg-theme-bg) / 0));
-}
+  .from-tg-theme-bg {
+    --tw-gradient-from: rgb(var(--tg-theme-bg));
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(var(--tg-theme-bg) / 0));
+  }
 
-.to-tg-theme-section {
-  --tw-gradient-to: rgb(var(--tg-theme-section));
-}
+  .to-tg-theme-section {
+    --tw-gradient-to: rgb(var(--tg-theme-section));
+  }
 
-/* Прозорість */
-.bg-tg-theme-bg\/80 {
-  background-color: rgb(var(--tg-theme-bg) / 0.8);
-}
+  .bg-tg-theme-bg\/80 {
+    background-color: rgb(var(--tg-theme-bg) / 0.8);
+  }
 
-.bg-tg-theme-section\/50 {
-  background-color: rgb(var(--tg-theme-section) / 0.5);
-}
+  .bg-tg-theme-section\/50 {
+    background-color: rgb(var(--tg-theme-section) / 0.5);
+  }
 
-.bg-tg-theme-button\/50 {
-  background-color: rgb(var(--tg-theme-button) / 0.5);
-}
+  .bg-tg-theme-button\/50 {
+    background-color: rgb(var(--tg-theme-button) / 0.5);
+  }
 
-/* Компоненти */
-.tg-button {
-  @apply w-full p-4 rounded-xl flex items-center justify-between transition-all;
-  background-color: rgb(var(--tg-theme-section));
-  border: 1px solid transparent;
-}
+  .tg-button {
+    @apply w-full p-4 rounded-xl flex items-center justify-between transition-all;
+    background-color: rgb(var(--tg-theme-section));
+    border: 1px solid transparent;
+  }
 
-.tg-button:hover {
-  background-color: rgb(var(--tg-theme-hover));
-  border-color: rgb(var(--tg-theme-button));
-  transform: translateY(-1px);
-}
+  .tg-button:hover {
+    background-color: rgb(var(--tg-theme-hover));
+    border-color: rgb(var(--tg-theme-button));
+    transform: translateY(-1px);
+  }
 
-.tg-icon-container {
-  @apply w-10 h-10 rounded-full flex items-center justify-center;
-  background-color: rgb(var(--tg-theme-button));
-}
+  .tg-icon-container {
+    @apply w-10 h-10 rounded-full flex items-center justify-center;
+    background-color: rgb(var(--tg-theme-button));
+  }
 
-/* Навігація */
-.bottom-nav {
-  @apply fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center rounded-full px-4 py-3 gap-8;
-  background-color: rgb(var(--tg-theme-section));
-  border: 1px solid rgb(var(--tg-theme-button));
-  backdrop-filter: blur(16px);
-}
+  .bottom-nav {
+    @apply fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center rounded-full px-4 py-3 gap-8;
+    background-color: rgb(var(--tg-theme-section));
+    border: 1px solid rgb(var(--tg-theme-button));
+    backdrop-filter: blur(16px);
+  }
 
-.nav-button {
-  @apply relative transition-all duration-500 ease-in-out rounded-2xl p-2 hover:scale-110 active:scale-95;
-}
+  .nav-button {
+    @apply relative transition-all duration-500 ease-in-out rounded-2xl p-2;
+  }
 
-.nav-button.active {
-  @apply text-tg-theme-text px-4;
-  background-color: rgb(var(--tg-theme-button));
-}
+  .nav-button:hover {
+    @apply scale-110;
+  }
 
-.nav-button:not(.active) {
-  @apply text-tg-theme-hint hover:text-tg-theme-text;
+  .nav-button:active {
+    @apply scale-95;
+  }
+
+  .nav-button.active {
+    @apply px-4;
+    color: rgb(var(--tg-theme-text));
+    background-color: rgb(var(--tg-theme-button));
+  }
+
+  .nav-button:not(.active) {
+    color: rgb(var(--tg-theme-hint));
+  }
+
+  .nav-button:not(.active):hover {
+    color: rgb(var(--tg-theme-text));
+  }
 }
 
 /* Утиліти */
