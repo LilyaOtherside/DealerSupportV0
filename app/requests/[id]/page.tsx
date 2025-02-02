@@ -29,6 +29,7 @@ import {
   Clock,
   AlertCircle
 } from 'lucide-react';
+import { MediaFiles } from '@/components/requests/MediaFiles';
 
 export default function RequestPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -238,72 +239,29 @@ export default function RequestPage({ params }: { params: { id: string } }) {
         ) : (
           // Перегляд запиту
           <div className="space-y-6">
-            <div className="bg-tg-theme-section/50 backdrop-blur-sm rounded-2xl p-4 space-y-4">
-              <div className="flex justify-between items-start gap-4">
+            <div className="space-y-2">
                 <h1 className="text-xl font-semibold">{request.title}</h1>
-                <span className={`shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                  request.priority === 'high' 
-                    ? 'bg-red-500/10 text-red-500' 
-                    : request.priority === 'medium'
-                    ? 'bg-yellow-500/10 text-yellow-500'
-                    : 'bg-green-500/10 text-green-500'
-                }`}>
-                  <AlertCircle className="w-3 h-3 mr-1" />
-                  {request.priority === 'low' ? 'Низький' : 
-                   request.priority === 'medium' ? 'Середній' : 'Високий'}
-                </span>
+              <p className="text-tg-theme-hint">{request.description}</p>
               </div>
 
-              <Separator className="bg-tg-theme-button/50" />
-
-              <p className="text-tg-theme-hint leading-relaxed">{request.description}</p>
-
-              <div className="flex justify-between items-center text-sm">
-                <div className="flex items-center text-tg-theme-hint">
-                  <Clock className="w-4 h-4 mr-1" />
-                  {new Date(request.created_at).toLocaleDateString()}
-                </div>
-                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                  request.status === 'new' 
-                    ? 'bg-blue-500/10 text-blue-500'
-                    : request.status === 'in_progress'
-                    ? 'bg-yellow-500/10 text-yellow-500'
-                    : request.status === 'resolved'
-                    ? 'bg-green-500/10 text-green-500'
-                    : 'bg-gray-500/10 text-gray-500'
-                }`}>
-                  {request.status === 'new' ? 'Новий' :
-                   request.status === 'in_progress' ? 'В роботі' :
-                   request.status === 'resolved' ? 'Вирішено' : 'Закрито'}
-                </span>
-              </div>
-            </div>
-
-            {request.media_urls.length > 0 && (
-              <div className="space-y-3">
-                <h2 className="text-lg font-medium">Медіа файли</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {request.media_urls.map((media, index) => (
-                    <div key={index} className="relative aspect-square group">
-                      {media.type === 'image' ? (
-                        <div className="relative w-full h-full rounded-xl overflow-hidden">
-                          <Image
-                            src={media.url}
-                            alt="Media"
-                            fill
-                            className="object-cover transition-transform group-hover:scale-105"
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-full h-full bg-tg-theme-section/50 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                          {media.type === 'video' ? '🎥' : '📄'}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {/* Медіафайли */}
+            <MediaFiles
+              files={request.media_urls}
+              requestId={request.id}
+              onUpdate={async (newFiles) => {
+                const { error } = await supabase
+                  .from('requests')
+                  .update({ media_urls: newFiles })
+                  .eq('id', request.id);
+                
+                if (error) {
+                  console.error('Error updating media files:', error);
+                  alert('Помилка при оновленні файлів');
+                } else {
+                  setRequest({ ...request, media_urls: newFiles });
+                }
+              }}
+            />
           </div>
         )}
 

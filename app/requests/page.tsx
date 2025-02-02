@@ -17,7 +17,8 @@ import {
   Filter, 
   Search, 
   Sun, 
-  User2
+  User2,
+  Paperclip
 } from 'lucide-react';
 import { BottomNav } from "@/components/BottomNav";
 
@@ -216,6 +217,19 @@ export default function RequestsPage() {
                 </div>
 
                 <Separator className="my-3 bg-tg-theme-button/50" />
+
+                <div className="flex items-center gap-4 mt-2 text-sm text-tg-theme-hint">
+                  <div className="flex items-center gap-1.5">
+                    <Clock size={14} />
+                    {new Date(request.created_at).toLocaleDateString()}
+                  </div>
+                  {request.media_urls.length > 0 && (
+                    <div className="flex items-center gap-1.5">
+                      <Paperclip size={14} className="rotate-45" />
+                      {request.media_urls.length}
+                    </div>
+                  )}
+                </div>
 
                 <div className="flex justify-between items-center text-xs">
                   <div className="flex items-center text-tg-theme-hint">
