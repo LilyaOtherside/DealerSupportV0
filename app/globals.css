@@ -2,139 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Темна тема за замовчуванням */
-  --tg-theme-bg: 15 15 15;
-  --tg-theme-section: 28 28 28;
-  --tg-theme-button: 44 44 44;
-  --tg-theme-hint: 107 114 128;
-  --tg-theme-text: 255 255 255;
-  --tg-theme-hover: 44 44 44;
-}
-
-:root.light-theme {
-  /* Світла тема */
-  --tg-theme-bg: 255 255 255;
-  --tg-theme-section: 243 244 246;
-  --tg-theme-button: 229 231 235;
-  --tg-theme-hint: 107 114 128;
-  --tg-theme-text: 15 23 42;
-  --tg-theme-hover: 243 244 246;
-}
-
 @layer base {
-  html, body {
-    @apply transition-colors duration-200;
-    background-color: rgb(var(--tg-theme-bg));
-    color: rgb(var(--tg-theme-text));
+  body {
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
   }
 }
 
-@layer components {
-  .bg-tg-theme-bg {
-    background-color: rgb(var(--tg-theme-bg));
+@layer utilities {
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
   }
 
-  .bg-tg-theme-section {
-    background-color: rgb(var(--tg-theme-section));
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
   }
-
-  .bg-tg-theme-button {
-    background-color: rgb(var(--tg-theme-button));
-  }
-
-  .text-tg-theme-hint {
-    color: rgb(var(--tg-theme-hint));
-  }
-
-  .text-tg-theme-text {
-    color: rgb(var(--tg-theme-text));
-  }
-
-  /* Градієнти */
-  .from-tg-theme-bg {
-    --tw-gradient-from: rgb(var(--tg-theme-bg));
-    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgb(var(--tg-theme-bg) / 0));
-  }
-
-  .to-tg-theme-section {
-    --tw-gradient-to: rgb(var(--tg-theme-section));
-  }
-
-  /* Прозорість */
-  .bg-tg-theme-bg\/80 {
-    background-color: rgb(var(--tg-theme-bg) / 0.8);
-  }
-
-  .bg-tg-theme-section\/50 {
-    background-color: rgb(var(--tg-theme-section) / 0.5);
-  }
-
-  .bg-tg-theme-button\/50 {
-    background-color: rgb(var(--tg-theme-button) / 0.5);
-  }
-
-  /* Кнопки */
-  .tg-button {
-    @apply w-full p-4 rounded-xl flex items-center justify-between transition-all;
-    background-color: rgb(var(--tg-theme-section));
-    border: 1px solid transparent;
-  }
-
-  .tg-button:hover {
-    background-color: rgb(var(--tg-theme-hover));
-    border-color: rgb(var(--tg-theme-button));
-    transform: translateY(-1px);
-  }
-
-  .tg-icon-container {
-    @apply w-10 h-10 rounded-full flex items-center justify-center;
-    background-color: rgb(var(--tg-theme-button));
-  }
-
-  /* Навігація */
-  .bottom-nav {
-    @apply fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center rounded-full px-4 py-3 gap-8;
-    background-color: rgb(var(--tg-theme-section));
-    border: 1px solid rgb(var(--tg-theme-button));
-    backdrop-filter: blur(16px);
-  }
-
-  .nav-button {
-    @apply relative transition-all duration-500 ease-in-out rounded-2xl p-2;
-    color: rgb(var(--tg-theme-hint));
-  }
-
-  .nav-button:hover {
-    @apply scale-110;
-    color: rgb(var(--tg-theme-text));
-  }
-
-  .nav-button:active {
-    @apply scale-95;
-  }
-
-  .nav-button.active {
-    @apply px-4;
-    color: rgb(var(--tg-theme-text));
-    background-color: rgb(var(--tg-theme-button));
-  }
-}
-
-/* Утиліти */
-::-webkit-scrollbar {
-  width: 0px;
-}
-
-.safe-top {
-  padding-top: env(safe-area-inset-top);
-}
-
-.safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-/* Анімації */
-.backdrop-blur-lg {
-  backdrop-filter: blur(16px);
 } 

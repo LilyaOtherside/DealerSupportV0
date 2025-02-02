@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 interface ThemeContextType {
   isDark: boolean;
@@ -13,38 +13,20 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [isDark, setIsDark] = useState(true);
-  const [mounted, setMounted] = useState(false);
-
-  // Встановлення початкової теми
-  useEffect(() => {
-    setMounted(true);
-    const savedTheme = localStorage.getItem('theme');
-    
-    if (savedTheme === 'light') {
-      setIsDark(false);
-      document.documentElement.classList.add('light-theme');
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('theme') !== 'light';
     }
-  }, []);
+    return true;
+  });
 
   const toggleTheme = () => {
-    const newTheme = !isDark;
-    setIsDark(newTheme);
-    
-    if (newTheme) {
-      // Перемикання на темну тему
-      localStorage.setItem('theme', 'dark');
-      document.documentElement.classList.remove('light-theme');
-    } else {
-      // Перемикання на світлу тему
-      localStorage.setItem('theme', 'light');
-      document.documentElement.classList.add('light-theme');
-    }
+    setIsDark(prev => {
+      const newTheme = !prev;
+      localStorage.setItem('theme', newTheme ? 'dark' : 'light');
+      return newTheme;
+    });
   };
-
-  if (!mounted) {
-    return null;
-  }
 
   return (
     <ThemeContext.Provider value={{ isDark, toggleTheme }}>

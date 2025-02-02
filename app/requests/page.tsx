@@ -106,69 +106,42 @@ export default function RequestsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-tg-theme-bg to-tg-theme-section text-tg-theme-text pt-5">
+    <div className={`min-h-screen ${isDark ? "bg-[#121212]" : "bg-white"} transition-colors duration-200`}>
       {/* Верхня панель */}
-      <div className="bg-tg-theme-bg/80 backdrop-blur-lg p-4 sticky top-0 z-10 safe-top">
-        <div className="flex justify-between items-center mb-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full w-8 h-8 hover:bg-tg-theme-button/50"
+      <div className={`${isDark ? "bg-[#1E1E1E]/80" : "bg-gray-100/80"} backdrop-blur-lg p-4 sticky top-0 z-10 safe-top`}>
+        <div className="flex items-center gap-2 mb-4">
+          <button
             onClick={toggleTheme}
+            className="hover:opacity-80 transition-opacity"
           >
             {isDark ? (
-              <Sun className="h-5 w-5 text-tg-theme-hint" />
+              <Sun className="h-5 w-5 text-white" />
             ) : (
-              <Moon className="h-5 w-5 text-tg-theme-hint" />
+              <Moon className="h-5 w-5 text-black" />
             )}
-          </Button>
-          <div className="text-xl font-semibold">Запити</div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full w-8 h-8 hover:bg-tg-theme-button/50"
-            onClick={() => router.push('/profile')}
-          >
-            {user?.photo_url ? (
-              <img
-                src={user.photo_url}
-                alt="Profile"
-                className="w-full h-full rounded-full object-cover"
-              />
-            ) : (
-              <User2 className="h-5 w-5 text-tg-theme-hint" />
-            )}
-          </Button>
+          </button>
+          <div className="text-xl font-semibold flex-1">Запити</div>
+          <div className="h-8 w-8 bg-[#6C5DD3] rounded-full flex items-center justify-center">
+            <span className="text-sm text-white">L</span>
+          </div>
         </div>
 
-        {/* Пошук та сортування за статусом */}
-        <div className="flex items-center gap-2 mb-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-tg-theme-hint" />
+        {/* Пошук та фільтри */}
+        <div className="flex gap-2">
+          <div className={`flex-1 flex items-center gap-2 ${isDark ? "bg-[#1E1E1E]" : "bg-gray-100"} rounded-lg px-3 py-2`}>
+            <Search className={isDark ? "text-gray-400" : "text-gray-500"} size={20} />
             <input
               type="text"
               placeholder="Пошук запитів..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-tg-theme-section/50 rounded-full pl-10 pr-4 py-2 text-sm placeholder:text-tg-theme-hint focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+              className={`bg-transparent border-none outline-none w-full ${isDark ? "text-gray-300 placeholder:text-gray-400" : "text-gray-700 placeholder:text-gray-500"}`}
             />
           </div>
-          <div className="relative">
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="appearance-none bg-tg-theme-section/50 rounded-full pl-3 pr-8 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-            >
-              <option value="all">Всі</option>
-              <option value="new">Новий</option>
-              <option value="in_progress">В роботі</option>
-              <option value="resolved">Вирішено</option>
-              <option value="closed">Закрито</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-              <Filter className="h-4 w-4 text-tg-theme-hint" />
-            </div>
-          </div>
+          <button className={`px-4 py-2 ${isDark ? "bg-[#1E1E1E] text-white" : "bg-gray-100 text-black"} rounded-lg`}>
+            Всі
+          </button>
+          <button className={`p-2 ${isDark ? "bg-[#1E1E1E]" : "bg-gray-100"} rounded-lg`}>
+            <Filter className={isDark ? "text-white" : "text-black"} size={20} />
+          </button>
         </div>
       </div>
 
