@@ -10,12 +10,14 @@ import { Separator } from "@/components/ui/separator";
 import { 
   Plus, 
   Clock, 
-  AlertCircle,
-  MessageCircle,
-  ChevronRight,
-  Loader2,
-  Filter,
-  Search
+  AlertCircle, 
+  MessageCircle, 
+  ChevronRight, 
+  Loader2, 
+  Filter, 
+  Search, 
+  Sun, 
+  User2
 } from 'lucide-react';
 
 export default function RequestsPage() {
@@ -103,8 +105,31 @@ export default function RequestsPage() {
     <div className="min-h-screen bg-gradient-to-b from-tg-theme-bg to-tg-theme-section text-white">
       {/* Верхня панель */}
       <div className="bg-tg-theme-bg/80 backdrop-blur-lg p-4 sticky top-0 z-10 safe-top">
-        <div className="flex justify-center mb-4">
+        <div className="flex justify-between items-center mb-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full w-8 h-8 hover:bg-tg-theme-button/50"
+          >
+            <Sun className="h-5 w-5 text-tg-theme-hint" />
+          </Button>
           <div className="text-xl font-semibold">Запити</div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="rounded-full w-8 h-8 hover:bg-tg-theme-button/50"
+            onClick={() => router.push('/profile')}
+          >
+            {user?.photo_url ? (
+              <img
+                src={user.photo_url}
+                alt="Profile"
+                className="w-full h-full rounded-full object-cover"
+              />
+            ) : (
+              <User2 className="h-5 w-5 text-tg-theme-hint" />
+            )}
+          </Button>
         </div>
 
         {/* Пошук та сортування за статусом */}
