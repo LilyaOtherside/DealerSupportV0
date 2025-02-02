@@ -106,55 +106,56 @@ export default function NewRequestPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const createRequest = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
-
     setIsSubmitting(true);
+
     try {
+      // Завантажуємо медіафайли
       const mediaUrls = await Promise.all(
-        mediaFiles.map(async (media, index) => {
-          try {
-            const url = await uploadFile(media.file);
-            setUploadProgress(((index + 1) / mediaFiles.length) * 100);
-            return {
-              url,
-              type: media.type
-            };
-          } catch (error) {
-            console.error(`Error uploading file ${index}:`, error);
-            throw error;
-          }
+        mediaFiles.map(async (file) => {
+          const fileName = `${user?.id}/${Date.now()}_${file.file.name}`;
+          const { data, error } = await supabase.storage
+            .from('request_media')
+            .upload(fileName, file.file);
+
+          if (error) throw error;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('request_media')
+            .getPublicUrl(fileName);
+
+          return {
+            url: publicUrl,
+            type: file.type
+          };
         })
       );
 
-      const { error } = await supabase
+      // Створюємо запит
+      const { data, error } = await supabase
         .from('requests')
-        .insert({
-          user_id: user.id,
-          title,
-          description,
-          priority,
-          status: 'new',
-          media_urls: mediaUrls
-        });
+        .insert([
+          {
+            user_id: user?.id,
+            title,
+            description,
+            priority,
+            status: 'new',
+            media_urls: mediaUrls
+          }
+        ])
+        .select()
+        .single();
 
       if (error) throw error;
+
       router.push('/requests');
     } catch (error) {
-      console.error('Error in handleSubmit:', error);
-      let errorMessage = 'Невідома помилка';
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else {
-        errorMessage = JSON.stringify(error);
-      }
-      alert(`Помилка при створенні запиту: ${errorMessage}`);
+      console.error('Error creating request:', error);
+      alert('Помилка при створенні запиту: ' + JSON.stringify(error));
     } finally {
       setIsSubmitting(false);
-      setUploadProgress(0);
     }
   };
 
@@ -177,7 +178,7 @@ export default function NewRequestPage() {
       </div>
 
       {/* Форма */}
-      <form onSubmit={handleSubmit} className="p-4 space-y-6">
+      <form onSubmit={createRequest} className="p-4 space-y-6">
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1.5">
