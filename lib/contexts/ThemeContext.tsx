@@ -25,7 +25,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (savedTheme === 'light') {
       setIsDark(false);
       root.classList.add('light-theme');
-      document.body.style.backgroundColor = 'rgb(248, 250, 252)';
+      document.body.style.backgroundColor = 'rgb(255, 255, 255)';
       document.body.style.color = 'rgb(15, 23, 42)';
     } else {
       root.classList.remove('light-theme');
@@ -49,7 +49,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       // Перемикання на світлу тему
       localStorage.setItem('theme', 'light');
       root.classList.add('light-theme');
-      document.body.style.backgroundColor = 'rgb(248, 250, 252)';
+      document.body.style.backgroundColor = 'rgb(255, 255, 255)';
       document.body.style.color = 'rgb(15, 23, 42)';
     }
   };

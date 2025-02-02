@@ -14,12 +14,12 @@
 
 :root.light-theme {
   /* Світла тема */
-  --tg-theme-bg: 248 250 252;
-  --tg-theme-section: 241 245 249;
-  --tg-theme-button: 226 232 240;
-  --tg-theme-hint: 100 116 139;
+  --tg-theme-bg: 255 255 255;
+  --tg-theme-section: 243 244 246;
+  --tg-theme-button: 229 231 235;
+  --tg-theme-hint: 107 114 128;
   --tg-theme-text: 15 23 42;
-  --tg-theme-hover: 226 232 240;
+  --tg-theme-hover: 243 244 246;
 }
 
 @layer base {
