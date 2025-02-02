@@ -19,7 +19,7 @@ import {
   Sun, 
   User2
 } from 'lucide-react';
-import { BottomNav } from "@/components/BottomNav";
+import { BottomNav } from "@/components/ui/BottomNav";
 
 export default function RequestsPage() {
   const { user, loading } = useUser();
@@ -269,16 +269,6 @@ export default function RequestsPage() {
                 )}
               </button>
             ))}
-            <div className="flex justify-center mt-6">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => router.push('/requests/new')}
-                className="text-blue-500 hover:bg-blue-500/10 h-12 w-12"
-              >
-                <Plus className="h-6 w-6" />
-              </Button>
-            </div>
           </div>
         )}
       </div>
