@@ -24,9 +24,6 @@ export function useTelegram() {
         const tgUser = webapp.initDataUnsafe?.user;
         if (tgUser) {
           try {
-            // Спочатку спробуємо авторизуватися
-            const { data: session } = await supabase.auth.getSession();
-            
             // Перевіряємо чи існує користувач
             const { data: existingUser, error: fetchError } = await supabase
               .from('users')
@@ -36,31 +33,9 @@ export function useTelegram() {
 
             if (fetchError && fetchError.code === 'PGRST116') {
               // Користувача не знайдено, створюємо нового
-              const email = `${tgUser.id}@telegram.user`;
-              const password = crypto.randomUUID();
-              
-              const { data: authUser, error: authError } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                  data: {
-                    telegram_id: tgUser.id.toString(),
-                    name: `${tgUser.first_name} ${tgUser.last_name || ''}`.trim(),
-                    photo_url: tgUser.photo_url,
-                  }
-                }
-              });
-              
-              if (authError) throw authError;
-              
-              if (!authUser.user?.id) {
-                throw new Error('Failed to create auth user');
-              }
-              
               const { data: newUser, error: insertError } = await supabase
                 .from('users')
                 .insert({
-                  id: authUser.user.id,
                   telegram_id: tgUser.id.toString(),
                   name: `${tgUser.first_name} ${tgUser.last_name || ''}`.trim(),
                   photo_url: tgUser.photo_url,
@@ -73,17 +48,6 @@ export function useTelegram() {
                 setUser(newUser as User);
               }
             } else if (existingUser) {
-              // Авторизуємо існуючого користувача
-              const email = `${tgUser.id}@telegram.user`;
-              const password = crypto.randomUUID();
-              
-              const { error: signInError } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-              });
-              
-              if (signInError) throw signInError;
-              
               setUser(existingUser as User);
             }
           } catch (error) {
