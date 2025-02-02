@@ -23,8 +23,13 @@
 }
 
 @layer base {
-  html, body {
+  /* Застосовуємо тему до всього застосунку */
+  #__next, 
+  html, 
+  body, 
+  main {
     @apply transition-colors duration-200;
+    min-height: 100vh;
     background-color: rgb(var(--tg-theme-bg));
     color: rgb(var(--tg-theme-text));
   }
