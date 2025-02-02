@@ -1,16 +1,27 @@
 'use client';
 
 import React, { useState } from "react";
+import { useRouter } from 'next/navigation';
 import { Archive, Plus, Settings } from "lucide-react";
 
 export const BottomNav = () => {
   const [activeIcon, setActiveIcon] = useState("plus");
-  
+  const router = useRouter();
+
+  const handlePlusClick = () => {
+    setActiveIcon("plus");
+    router.push('/requests/new');
+  };
+
   return (
-    <nav className="bottom-nav">
+    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center bg-black/80 backdrop-blur-lg rounded-full px-4 py-3 gap-8">
       <button
         onClick={() => setActiveIcon("archive")}
-        className={`nav-button ${activeIcon === "archive" ? "active" : ""}`}
+        className={`relative transition-all duration-500 ease-in-out rounded-2xl p-2 hover:scale-110 active:scale-95 ${
+          activeIcon === "archive" 
+            ? "text-white bg-gray-800/50 scale-110 px-4" 
+            : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+        }`}
       >
         <Archive
           size={22}
@@ -20,8 +31,12 @@ export const BottomNav = () => {
         />
       </button>
       <button
-        onClick={() => setActiveIcon("plus")}
-        className={`nav-button ${activeIcon === "plus" ? "active" : ""}`}
+        onClick={handlePlusClick}
+        className={`relative transition-all duration-500 ease-in-out rounded-2xl p-2 hover:scale-110 active:scale-95 ${
+          activeIcon === "plus" 
+            ? "text-white bg-gray-800/50 scale-110 px-4" 
+            : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+        }`}
       >
         <Plus
           size={26}
@@ -32,7 +47,11 @@ export const BottomNav = () => {
       </button>
       <button
         onClick={() => setActiveIcon("settings")}
-        className={`nav-button ${activeIcon === "settings" ? "active" : ""}`}
+        className={`relative transition-all duration-500 ease-in-out rounded-2xl p-2 hover:scale-110 active:scale-95 ${
+          activeIcon === "settings" 
+            ? "text-white bg-gray-800/50 scale-110 px-4" 
+            : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+        }`}
       >
         <Settings
           size={22}
