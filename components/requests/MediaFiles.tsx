@@ -44,13 +44,15 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
             .from('request-media')
             .getPublicUrl(fileName);
 
+          const fileType: MediaFile['type'] = file.type.startsWith('image/') 
+            ? 'image' 
+            : file.type.startsWith('video/') 
+            ? 'video' 
+            : 'document';
+
           return {
             url: publicUrl,
-            type: file.type.startsWith('image/') 
-              ? 'image' 
-              : file.type.startsWith('video/') 
-              ? 'video' 
-              : 'document'
+            type: fileType
           };
         })
       );
