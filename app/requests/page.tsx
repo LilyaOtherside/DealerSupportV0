@@ -19,7 +19,7 @@ import {
   Sun, 
   User2
 } from 'lucide-react';
-import { BottomNav } from "@/components/ui/BottomNav";
+import { BottomNav } from "@/components/BottomNav";
 
 export default function RequestsPage() {
   const { user, loading } = useUser();
