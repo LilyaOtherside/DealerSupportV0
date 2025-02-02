@@ -116,13 +116,13 @@ export default function NewRequestPage() {
         mediaFiles.map(async (file) => {
           const fileName = `${user?.id}/${Date.now()}_${file.file.name}`;
           const { data, error } = await supabase.storage
-            .from('request_media')
+            .from('request-media')
             .upload(fileName, file.file);
 
           if (error) throw error;
 
           const { data: { publicUrl } } = supabase.storage
-            .from('request_media')
+            .from('request-media')
             .getPublicUrl(fileName);
 
           return {
