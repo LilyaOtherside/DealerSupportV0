@@ -1,38 +1,40 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 interface ThemeContextType {
   isDark: boolean;
   toggleTheme: () => void;
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const ThemeContext = createContext<ThemeContextType>({
+  isDark: true,
+  toggleTheme: () => {},
+});
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
-    // Перевіряємо збережену тему при завантаженні
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-      setIsDark(savedTheme === 'dark');
-      if (savedTheme === 'light') {
-        document.documentElement.classList.add('light-theme');
-      }
+    const theme = localStorage.getItem('theme');
+    if (theme === 'light') {
+      setIsDark(false);
+      document.documentElement.classList.add('light-theme');
     }
   }, []);
 
   const toggleTheme = () => {
-    const newTheme = !isDark;
-    setIsDark(newTheme);
-    localStorage.setItem('theme', newTheme ? 'dark' : 'light');
-    
-    if (newTheme) {
-      document.documentElement.classList.remove('light-theme');
-    } else {
-      document.documentElement.classList.add('light-theme');
-    }
+    setIsDark(prev => {
+      const newTheme = !prev;
+      if (newTheme) {
+        localStorage.setItem('theme', 'dark');
+        document.documentElement.classList.remove('light-theme');
+      } else {
+        localStorage.setItem('theme', 'light');
+        document.documentElement.classList.add('light-theme');
+      }
+      return newTheme;
+    });
   };
 
   return (
@@ -42,10 +44,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
-  return context;
-} 
+export const useTheme = () => useContext(ThemeContext); 
