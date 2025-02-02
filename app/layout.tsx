@@ -1,10 +1,17 @@
 import './globals.css';
 import { UserProvider } from '@/lib/contexts/UserContext';
+import { ThemeProvider } from '@/lib/contexts/ThemeContext';
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: 'no',
+}
 
 export const metadata = {
   title: 'Dealer Support',
   description: 'Система підтримки дилерів',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
 }
 
 export default function RootLayout({
@@ -16,11 +23,12 @@ export default function RootLayout({
     <html lang="uk">
       <head>
         <script src="https://telegram.org/js/telegram-web-app.js" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
       </head>
       <body className="bg-tg-theme-bg text-white">
         <UserProvider>
-          {children}
+          <ThemeProvider>
+            {children}
+          </ThemeProvider>
         </UserProvider>
       </body>
     </html>
