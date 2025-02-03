@@ -43,11 +43,11 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
             .from('request-media')
             .getPublicUrl(filePath);
 
-          const fileType: MediaFile['type'] = file.type.startsWith('image/') 
-            ? 'image' 
-            : file.type.startsWith('video/') 
-            ? 'video' 
-            : 'document';
+          // Визначаємо тип файлу за розширенням
+          const fileType: MediaFile['type'] = 
+            /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name) ? 'image' :
+            /\.(mp4|webm|mov)$/i.test(file.name) ? 'video' :
+            'document';
 
           return {
             url: publicUrl,
@@ -72,7 +72,11 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
       onUpdate(updatedFiles);
     } catch (error) {
       console.error('Error uploading files:', error);
-      alert(error instanceof Error ? error.message : 'Помилка при завантаженні файлів');
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert('Помилка при завантаженні файлів');
+      }
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -168,55 +172,64 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
       </div>
 
       <div className="flex flex-wrap gap-3">
-        {files?.map((file, index) => (
-          <div
-            key={file.url + index}
-            className="relative group rounded-lg overflow-hidden bg-tg-theme-section/50 backdrop-blur-sm w-[160px]"
-          >
-            {file && file.type === 'image' ? (
-              <div className="aspect-square relative">
-                <Image
-                  src={file.url || ''}
-                  alt=""
-                  fill
-                  unoptimized
-                  loading="eager"
-                  className="object-cover"
-                />
+        {files?.map((file, index) => {
+          // Визначаємо тип файлу за URL, якщо тип не вказано
+          const fileType = file.type || (
+            /\.(jpg|jpeg|png|gif|webp)$/i.test(file.url) ? 'image' :
+            /\.(mp4|webm|mov)$/i.test(file.url) ? 'video' :
+            'document'
+          );
+
+          return (
+            <div
+              key={file.url + index}
+              className="relative group rounded-lg overflow-hidden bg-tg-theme-section/50 backdrop-blur-sm w-[160px]"
+            >
+              {fileType === 'image' ? (
+                <div className="aspect-square relative">
+                  <Image
+                    src={file.url || ''}
+                    alt=""
+                    fill
+                    unoptimized
+                    loading="eager"
+                    className="object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="aspect-square flex items-center justify-center">
+                  <span className="text-2xl">
+                    {fileType === 'video' ? '🎥' : '📄'}
+                  </span>
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-white hover:bg-blue-500/20"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (file?.url) window.open(file.url, '_blank');
+                  }}
+                >
+                  <Download size={18} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-white hover:bg-red-500/20"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (file?.url) handleDelete(file.url, index);
+                  }}
+                >
+                  <Trash2 size={18} />
+                </Button>
               </div>
-            ) : (
-              <div className="aspect-square flex items-center justify-center">
-                <span className="text-2xl">
-                  {file?.type === 'video' ? '🎥' : '📄'}
-                </span>
-              </div>
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-white hover:bg-blue-500/20"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (file?.url) window.open(file.url, '_blank');
-                }}
-              >
-                <Download size={18} />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-white hover:bg-red-500/20"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (file?.url) handleDelete(file.url, index);
-                }}
-              >
-                <Trash2 size={18} />
-              </Button>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
