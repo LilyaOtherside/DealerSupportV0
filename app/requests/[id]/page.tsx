@@ -106,30 +106,7 @@ export default function RequestPage({ params }: { params: { id: string } }) {
     
     setIsDeleting(true);
     try {
-      // Спочатку видаляємо всі медіафайли
-      if (request.media_urls && request.media_urls.length > 0) {
-        // Отримуємо всі файли для видалення
-        const filePaths = request.media_urls
-          .map(file => file.url.split('request-media/')[1]?.split('?')[0])
-          .filter(Boolean);
-        
-        console.log('Deleting files:', filePaths);
-        
-        // Видаляємо файли тільки якщо вони є
-        if (filePaths.length > 0) {
-        const { error: storageError } = await supabase.storage
-          .from('request-media')
-            .remove(filePaths);
-        
-        if (storageError) {
-          console.error('Storage error:', storageError);
-            // Продовжуємо видалення запиту навіть якщо виникла помилка з файлами
-            console.warn('Failed to delete some files, continuing with request deletion');
-          }
-        }
-      }
-      
-      // Видаляємо запит
+      // Спочатку видаляємо запит з бази даних
       const { error } = await supabase
         .from('requests')
         .delete()
@@ -141,7 +118,25 @@ export default function RequestPage({ params }: { params: { id: string } }) {
         throw error;
       }
 
-      // Перенаправляємо тільки після успішного видалення
+      // Видаляємо медіафайли
+      if (request.media_urls && request.media_urls.length > 0) {
+        const filePaths = request.media_urls
+          .map(file => file.url.split('request-media/')[1]?.split('?')[0])
+          .filter(Boolean);
+        
+        console.log('Deleting files:', filePaths);
+        
+        if (filePaths.length > 0) {
+          await Promise.allSettled(
+            filePaths.map(path =>
+              supabase.storage
+                .from('request-media')
+                .remove([path])
+            )
+          );
+        }
+      }
+
       router.push('/requests');
     } catch (error) {
       console.error('Error deleting request:', error);

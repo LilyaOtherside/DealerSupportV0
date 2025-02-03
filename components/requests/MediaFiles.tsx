@@ -79,7 +79,6 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
 
   const handleDelete = async (fileUrl: string, index: number) => {
     try {
-      // Отримуємо повний шлях після bucket name
       const filePath = fileUrl.split('request-media/')[1]?.split('?')[0];
       
       console.log('Deleting file:', filePath);
@@ -88,31 +87,29 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
         throw new Error('Invalid file path');
       }
 
-      // Спочатку оновлюємо запит в базі даних
       const newFiles = files.filter((_, i) => i !== index);
       
       const { error: updateError } = await supabase
         .from('requests')
-        .update({ media_urls: newFiles })
+        .update({ 
+          media_urls: newFiles,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', requestId)
         .single();
       
       if (updateError) {
-        console.error('Update error:', updateError);
         throw updateError;
       }
-
-      // Потім видаляємо файл зі сховища
-      const { error: deleteError } = await supabase.storage
+      
+      await supabase.storage
         .from('request-media')
-        .remove([filePath]);
-
-      if (deleteError) {
-        console.error('Delete error:', deleteError);
-        // Якщо файл не вдалося видалити, але запит оновлено,
-        // продовжуємо роботу і показуємо попередження
-        console.warn('Failed to delete file from storage, but request was updated');
-      }
+        .remove([filePath])
+        .then(({ error }) => {
+          if (error) {
+            console.warn('Failed to delete file from storage:', error);
+          }
+        });
       
       onUpdate(newFiles);
     } catch (error) {
