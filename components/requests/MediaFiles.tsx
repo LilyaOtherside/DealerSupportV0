@@ -83,12 +83,16 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
 
   const handleDelete = async (fileUrl: string, index: number) => {
     try {
+      if (!fileUrl) {
+        throw new Error('URL файлу відсутній');
+      }
+      
       const filePath = fileUrl.split('request-media/')[1]?.split('?')[0];
       
       console.log('Deleting file:', filePath);
       
       if (!filePath) {
-        throw new Error('Invalid file path');
+        throw new Error('Неправильний шлях до файлу');
       }
 
       const { error: deleteError } = await supabase.storage
@@ -96,6 +100,7 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
         .remove([filePath]);
 
       if (deleteError) {
+        console.error('Storage delete error:', deleteError);
         throw deleteError;
       }
 
@@ -111,13 +116,18 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
         .single();
       
       if (updateError) {
+        console.error('Database update error:', updateError);
         throw updateError;
       }
       
       onUpdate(newFiles);
     } catch (error) {
       console.error('Error deleting file:', error);
-      alert(error instanceof Error ? error.message : 'Помилка при видаленні файлу');
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert('Помилка при видаленні файлу');
+      }
     }
   };
 
@@ -153,15 +163,15 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
       </div>
 
       <div className="flex flex-wrap gap-3">
-        {files.map((file, index) => (
+        {files?.map((file, index) => (
           <div
             key={file.url + index}
             className="relative group rounded-lg overflow-hidden bg-tg-theme-section/50 backdrop-blur-sm w-[160px]"
           >
-            {file.type === 'image' ? (
+            {file && file.type === 'image' ? (
               <div className="aspect-square relative">
                 <Image
-                  src={file.url}
+                  src={file.url || ''}
                   alt=""
                   fill
                   unoptimized
@@ -172,7 +182,7 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
             ) : (
               <div className="aspect-square flex items-center justify-center">
                 <span className="text-2xl">
-                  {file.type === 'video' ? '🎥' : '📄'}
+                  {file?.type === 'video' ? '🎥' : '📄'}
                 </span>
               </div>
             )}
