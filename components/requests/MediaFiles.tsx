@@ -137,24 +137,25 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
         />
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="flex flex-wrap gap-3">
         {files.map((file, index) => (
           <div
             key={file.url + index}
-            className="relative group rounded-xl overflow-hidden bg-tg-theme-section/50 backdrop-blur-sm"
+            className="relative group rounded-lg overflow-hidden bg-tg-theme-section/50 backdrop-blur-sm w-[160px]"
           >
             {file.type === 'image' ? (
-              <div className="aspect-[4/3] relative">
+              <div className="aspect-square relative">
                 <Image
                   src={file.url}
                   alt=""
                   fill
                   unoptimized
+                  loading="eager"
                   className="object-cover"
                 />
               </div>
             ) : (
-              <div className="aspect-[4/3] flex items-center justify-center">
+              <div className="aspect-square flex items-center justify-center">
                 <span className="text-2xl">
                   {file.type === 'video' ? '🎥' : '📄'}
                 </span>
