@@ -29,18 +29,15 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
     try {
       const newMediaUrls = await Promise.all(
         Array.from(selectedFiles).map(async (file) => {
-          const fileName = `${Date.now()}_${file.name}`;
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
           const filePath = `${requestId}/${fileName}`;
 
-          const { error } = await supabase.storage
+          const { error: uploadError } = await supabase.storage
             .from('request-media')
-            .upload(filePath, file, {
-              upsert: false,
-              cacheControl: '3600',
-              contentType: file.type
-            });
+            .upload(filePath, file);
 
-          if (error) throw error;
+          if (uploadError) throw uploadError;
 
           const { data: { publicUrl } } = supabase.storage
             .from('request-media')
@@ -61,7 +58,6 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
 
       const updatedFiles = [...files, ...newMediaUrls];
       
-      // Оновлюємо запит в базі даних
       const { error: updateError } = await supabase
         .from('requests')
         .update({ media_urls: updatedFiles })
@@ -75,25 +71,27 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
       alert('Помилка при завантаженні файлів');
     } finally {
       setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
   const handleDelete = async (fileUrl: string, index: number) => {
     try {
-      // Отримуємо шлях до файлу
-      const filePath = fileUrl.split('request-media/')[1];
+      const pathMatch = fileUrl.match(/request-media\/([^?]+)/);
+      if (!pathMatch) return;
       
-      if (!filePath) return;
-
-      const { error } = await supabase.storage
+      const filePath = decodeURIComponent(pathMatch[1]);
+      
+      const { error: deleteError } = await supabase.storage
         .from('request-media')
-        .remove([decodeURIComponent(filePath)]);
+        .remove([filePath]);
 
-      if (error) throw error;
+      if (deleteError) throw deleteError;
 
       const newFiles = files.filter((_, i) => i !== index);
       
-      // Оновлюємо запит в базі даних
       const { error: updateError } = await supabase
         .from('requests')
         .update({ media_urls: newFiles })
@@ -122,8 +120,12 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
           disabled={isUploading}
           className="text-blue-500 hover:text-blue-600"
         >
-          <Plus size={16} className="mr-1" />
-          Додати файл
+          {isUploading ? 'Завантаження...' : (
+            <>
+              <Plus size={16} className="mr-1" />
+              Додати файл
+            </>
+          )}
         </Button>
         <input
           ref={fileInputRef}
@@ -138,7 +140,7 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
       <div className="grid grid-cols-2 gap-4">
         {files.map((file, index) => (
           <div
-            key={file.url}
+            key={file.url + index}
             className="relative group rounded-lg overflow-hidden bg-tg-theme-button/50"
           >
             {file.type === 'image' ? (
@@ -148,8 +150,6 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
                   alt=""
                   fill
                   unoptimized
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  priority
                   className="object-cover"
                 />
               </div>
@@ -165,7 +165,10 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
                 variant="ghost"
                 size="icon"
                 className="text-white hover:text-blue-500"
-                onClick={() => window.open(file.url, '_blank')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.open(file.url, '_blank');
+                }}
               >
                 <Download size={18} />
               </Button>
@@ -173,7 +176,10 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
                 variant="ghost"
                 size="icon"
                 className="text-white hover:text-red-500"
-                onClick={() => handleDelete(file.url, index)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(file.url, index);
+                }}
               >
                 <Trash2 size={18} />
               </Button>
