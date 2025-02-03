@@ -118,7 +118,7 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
           size="sm"
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          className="text-blue-500 hover:text-blue-600"
+          className="text-blue-500 hover:bg-blue-500/10"
         >
           {isUploading ? 'Завантаження...' : (
             <>
@@ -137,14 +137,14 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {files.map((file, index) => (
           <div
             key={file.url + index}
-            className="relative group rounded-lg overflow-hidden bg-tg-theme-button/50"
+            className="relative group rounded-xl overflow-hidden bg-tg-theme-section/50 backdrop-blur-sm"
           >
             {file.type === 'image' ? (
-              <div className="aspect-video relative">
+              <div className="aspect-[4/3] relative">
                 <Image
                   src={file.url}
                   alt=""
@@ -154,17 +154,17 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
                 />
               </div>
             ) : (
-              <div className="aspect-video flex items-center justify-center">
+              <div className="aspect-[4/3] flex items-center justify-center">
                 <span className="text-2xl">
                   {file.type === 'video' ? '🎥' : '📄'}
                 </span>
               </div>
             )}
-            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center gap-2">
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-white hover:text-blue-500"
+                className="text-white hover:bg-blue-500/20"
                 onClick={(e) => {
                   e.stopPropagation();
                   window.open(file.url, '_blank');
@@ -175,7 +175,7 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-white hover:text-red-500"
+                className="text-white hover:bg-red-500/20"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleDelete(file.url, index);
