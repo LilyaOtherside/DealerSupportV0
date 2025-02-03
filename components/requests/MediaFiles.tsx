@@ -79,13 +79,19 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
 
   const handleDelete = async (fileUrl: string, index: number) => {
     try {
-      const filePath = `${requestId}/${fileUrl.split('/').pop()?.split('?')[0]}`;
+      const fileName = fileUrl.split('/').pop()?.split('?')[0];
+      const filePath = `${requestId}/${fileName}`;
       
+      console.log('Deleting file:', filePath);
+
       const { error: deleteError } = await supabase.storage
         .from('request-media')
         .remove([filePath]);
 
-      if (deleteError) throw deleteError;
+      if (deleteError) {
+        console.error('Delete error:', deleteError);
+        throw deleteError;
+      }
 
       const newFiles = files.filter((_, i) => i !== index);
       
@@ -94,7 +100,10 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
         .update({ media_urls: newFiles })
         .eq('id', requestId);
       
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Update error:', updateError);
+        throw updateError;
+      }
       
       onUpdate(newFiles);
     } catch (error) {

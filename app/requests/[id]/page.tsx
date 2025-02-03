@@ -107,24 +107,34 @@ export default function RequestPage({ params }: { params: { id: string } }) {
     setIsDeleting(true);
     try {
       // Спочатку видаляємо всі медіафайли
-      if (request.media_urls.length > 0) {
-        const filePaths = request.media_urls.map(file => 
-          `${request.id}/${file.url.split('/').pop()?.split('?')[0]}`
-        );
+      if (request.media_urls && request.media_urls.length > 0) {
+        const filePaths = request.media_urls.map(file => {
+          const fileName = file.url.split('/').pop()?.split('?')[0];
+          return `${params.id}/${fileName}`;
+        });
+        
+        console.log('Deleting files:', filePaths);
         
         const { error: storageError } = await supabase.storage
           .from('request-media')
-          .remove(filePaths);
+          .remove(filePaths.filter(Boolean) as string[]);
         
-        if (storageError) throw storageError;
+        if (storageError) {
+          console.error('Storage error:', storageError);
+          throw storageError;
+        }
       }
       
+      // Видаляємо запит
       const { error } = await supabase
         .from('requests')
         .delete()
-        .eq('id', request.id);
+        .eq('id', params.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Delete error:', error);
+        throw error;
+      }
 
       router.push('/requests');
     } catch (error) {
