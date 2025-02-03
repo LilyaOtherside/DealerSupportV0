@@ -79,10 +79,14 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
 
   const handleDelete = async (fileUrl: string, index: number) => {
     try {
-      const fileName = fileUrl.split('/').pop()?.split('?')[0];
-      const filePath = `${requestId}/${fileName}`;
+      // Отримуємо повний шлях після bucket name
+      const filePath = fileUrl.split('request-media/')[1]?.split('?')[0];
       
       console.log('Deleting file:', filePath);
+      
+      if (!filePath) {
+        throw new Error('Invalid file path');
+      }
 
       const { error: deleteError } = await supabase.storage
         .from('request-media')

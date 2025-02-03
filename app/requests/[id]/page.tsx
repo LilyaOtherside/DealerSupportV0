@@ -109,15 +109,16 @@ export default function RequestPage({ params }: { params: { id: string } }) {
       // Спочатку видаляємо всі медіафайли
       if (request.media_urls && request.media_urls.length > 0) {
         const filePaths = request.media_urls.map(file => {
-          const fileName = file.url.split('/').pop()?.split('?')[0];
-          return `${params.id}/${fileName}`;
+          // Отримуємо повний шлях після bucket name
+          const path = file.url.split('request-media/')[1]?.split('?')[0];
+          return path;
         });
         
         console.log('Deleting files:', filePaths);
         
         const { error: storageError } = await supabase.storage
           .from('request-media')
-          .remove(filePaths.filter(Boolean) as string[]);
+          .remove(filePaths.filter(Boolean));
         
         if (storageError) {
           console.error('Storage error:', storageError);
