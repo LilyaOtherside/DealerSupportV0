@@ -29,10 +29,10 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
     try {
       const newMediaUrls = await Promise.all(
         Array.from(selectedFiles).map(async (file) => {
-          const fileName = `${requestId}/${Date.now()}_${file.name}`;
+          const fileName = `${Date.now()}_${file.name}`;
           const { error } = await supabase.storage
             .from('request-media')
-            .upload(fileName, file, {
+            .upload(`${requestId}/${fileName}`, file, {
               upsert: false,
               cacheControl: '3600',
               contentType: file.type
@@ -42,7 +42,7 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
 
           const { data: { publicUrl } } = supabase.storage
             .from('request-media')
-            .getPublicUrl(fileName);
+            .getPublicUrl(`${requestId}/${fileName}`);
 
           const fileType: MediaFile['type'] = file.type.startsWith('image/') 
             ? 'image' 
@@ -68,7 +68,8 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
 
   const handleDelete = async (fileUrl: string, index: number) => {
     try {
-      const fileName = fileUrl.split('/').pop();
+      const pathParts = new URL(fileUrl).pathname.split('/');
+      const fileName = pathParts[pathParts.length - 1];
       if (!fileName) return;
 
       const { error } = await supabase.storage
@@ -124,6 +125,7 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
                   src={file.url}
                   alt=""
                   fill
+                  unoptimized
                   className="object-cover"
                 />
               </div>
