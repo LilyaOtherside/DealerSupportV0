@@ -249,17 +249,7 @@ export default function RequestPage({ params }: { params: { id: string } }) {
               files={request.media_urls}
               requestId={request.id}
               onUpdate={async (newFiles) => {
-                const { error } = await supabase
-                  .from('requests')
-                  .update({ media_urls: newFiles })
-                  .eq('id', request.id);
-                
-                if (error) {
-                  console.error('Error updating media files:', error);
-                  alert('Помилка при оновленні файлів');
-                } else {
-                  setRequest({ ...request, media_urls: newFiles });
-                }
+                setRequest({ ...request, media_urls: newFiles });
               }}
             />
           </div>

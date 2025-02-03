@@ -30,9 +30,11 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
       const newMediaUrls = await Promise.all(
         Array.from(selectedFiles).map(async (file) => {
           const fileName = `${Date.now()}_${file.name}`;
+          const filePath = `${requestId}/${fileName}`;
+
           const { error } = await supabase.storage
             .from('request-media')
-            .upload(`${requestId}/${fileName}`, file, {
+            .upload(filePath, file, {
               upsert: false,
               cacheControl: '3600',
               contentType: file.type
@@ -42,7 +44,7 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
 
           const { data: { publicUrl } } = supabase.storage
             .from('request-media')
-            .getPublicUrl(`${requestId}/${fileName}`);
+            .getPublicUrl(filePath);
 
           const fileType: MediaFile['type'] = file.type.startsWith('image/') 
             ? 'image' 
@@ -57,7 +59,17 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
         })
       );
 
-      onUpdate([...files, ...newMediaUrls]);
+      const updatedFiles = [...files, ...newMediaUrls];
+      
+      // Оновлюємо запит в базі даних
+      const { error: updateError } = await supabase
+        .from('requests')
+        .update({ media_urls: updatedFiles })
+        .eq('id', requestId);
+      
+      if (updateError) throw updateError;
+      
+      onUpdate(updatedFiles);
     } catch (error) {
       console.error('Error uploading files:', error);
       alert('Помилка при завантаженні файлів');
@@ -68,17 +80,29 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
 
   const handleDelete = async (fileUrl: string, index: number) => {
     try {
-      const pathParts = new URL(fileUrl).pathname.split('/');
-      const fileName = pathParts[pathParts.length - 1];
+      // Отримуємо шлях до файлу з URL
+      const urlParts = fileUrl.split('/');
+      const fileName = urlParts[urlParts.length - 1];
+      const filePath = `${requestId}/${fileName}`;
+      
       if (!fileName) return;
 
       const { error } = await supabase.storage
         .from('request-media')
-        .remove([`${requestId}/${fileName}`]);
+        .remove([filePath]);
 
       if (error) throw error;
 
       const newFiles = files.filter((_, i) => i !== index);
+      
+      // Оновлюємо запит в базі даних
+      const { error: updateError } = await supabase
+        .from('requests')
+        .update({ media_urls: newFiles })
+        .eq('id', requestId);
+      
+      if (updateError) throw updateError;
+      
       onUpdate(newFiles);
     } catch (error) {
       console.error('Error deleting file:', error);
