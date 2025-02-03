@@ -9,7 +9,7 @@ import { supabase } from '@/lib/supabase';
 interface MediaFile {
   url: string;
   type: 'image' | 'video' | 'document';
-  name: string;
+  name?: string;
 }
 
 interface MediaFilesProps {
@@ -49,6 +49,12 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Нормалізуємо старі файли, додаючи ім'я файлу, якщо воно відсутнє
+  const normalizedFiles = files.map(file => ({
+    ...file,
+    name: file.name || file.url.split('/').pop()?.split('?')[0] || ''
+  }));
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = e.target.files;
     if (!selectedFiles) return;
@@ -87,7 +93,7 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
         })
       );
 
-      const updatedFiles = [...files, ...newMediaUrls];
+      const updatedFiles = [...normalizedFiles, ...newMediaUrls];
       
       console.log('Updating database with files:', updatedFiles);
 
@@ -120,11 +126,11 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
 
   const handleDelete = async (fileUrl: string, index: number) => {
     try {
-      if (!fileUrl || !files[index]) {
+      if (!fileUrl || !normalizedFiles[index]) {
         throw new Error('URL файлу відсутній');
       }
       
-      const filePath = `${requestId}/${files[index].name}`;
+      const filePath = `${requestId}/${normalizedFiles[index].name}`;
       
       console.log('Deleting file:', filePath);
       
@@ -137,7 +143,7 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
         throw deleteError;
       }
 
-      const newFiles = files.filter((_, i) => i !== index);
+      const newFiles = normalizedFiles.filter((_, i) => i !== index);
       
       console.log('Updating database after deletion:', newFiles);
 
@@ -171,7 +177,7 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-tg-theme-hint">
           <Paperclip size={16} className="rotate-45" />
-          <span>Вкладення ({files?.length || 0})</span>
+          <span>Вкладення ({normalizedFiles?.length || 0})</span>
         </div>
         <Button
           variant="ghost"
@@ -198,7 +204,7 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
       </div>
 
       <div className="flex flex-wrap gap-3">
-        {files?.map((file, index) => {
+        {normalizedFiles?.map((file, index) => {
           // Визначаємо тип файлу за URL, якщо тип не вказано
           const fileType = file.type || (
             /\.(jpg|jpeg|png|gif|webp)$/i.test(file.url) ? 'image' :
