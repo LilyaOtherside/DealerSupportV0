@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase';
 interface MediaFile {
   url: string;
   type: 'image' | 'video' | 'document';
+  name: string;
 }
 
 interface MediaFilesProps {
@@ -56,11 +57,12 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
     try {
       const newMediaUrls = await Promise.all(
         Array.from(selectedFiles).map(async (file) => {
-          // Отримуємо розширення та ім'я файлу
           const fileExt = file.name.split('.').pop() || '';
           const cleanName = sanitizeFileName(file.name.replace(`.${fileExt}`, ''));
           const fileName = `${Date.now()}_${cleanName}.${fileExt}`;
           const filePath = `${requestId}/${fileName}`;
+
+          console.log('Uploading file:', { filePath, originalName: file.name });
 
           const { error: uploadError } = await supabase.storage
             .from('request-media')
@@ -72,7 +74,6 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
             .from('request-media')
             .getPublicUrl(filePath);
 
-          // Визначаємо тип файлу за розширенням
           const fileType: MediaFile['type'] = 
             /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name) ? 'image' :
             /\.(mp4|webm|mov)$/i.test(file.name) ? 'video' :
@@ -80,13 +81,16 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
 
           return {
             url: publicUrl,
-            type: fileType
+            type: fileType,
+            name: fileName
           };
         })
       );
 
       const updatedFiles = [...files, ...newMediaUrls];
       
+      console.log('Updating database with files:', updatedFiles);
+
       const { error: updateError } = await supabase
         .from('requests')
         .update({ 
@@ -120,19 +124,10 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
         throw new Error('URL файлу відсутній');
       }
       
-      const urlParts = fileUrl.split('request-media/');
-      if (urlParts.length < 2) {
-        throw new Error('Неправильний формат URL файлу');
-      }
-      
-      const filePath = urlParts[1].split('?')[0];
+      const filePath = `${requestId}/${files[index].name}`;
       
       console.log('Deleting file:', filePath);
       
-      if (!filePath) {
-        throw new Error('Неправильний шлях до файлу');
-      }
-
       const { error: deleteError } = await supabase.storage
         .from('request-media')
         .remove([filePath]);
@@ -144,6 +139,8 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
 
       const newFiles = files.filter((_, i) => i !== index);
       
+      console.log('Updating database after deletion:', newFiles);
+
       const { error: updateError } = await supabase
         .from('requests')
         .update({ 
