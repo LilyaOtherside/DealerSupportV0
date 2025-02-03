@@ -83,11 +83,16 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
 
   const handleDelete = async (fileUrl: string, index: number) => {
     try {
-      if (!fileUrl) {
+      if (!fileUrl || !files[index]) {
         throw new Error('URL файлу відсутній');
       }
       
-      const filePath = fileUrl.split('request-media/')[1]?.split('?')[0];
+      const urlParts = fileUrl.split('request-media/');
+      if (urlParts.length < 2) {
+        throw new Error('Неправильний формат URL файлу');
+      }
+      
+      const filePath = urlParts[1].split('?')[0];
       
       console.log('Deleting file:', filePath);
       
@@ -136,7 +141,7 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-tg-theme-hint">
           <Paperclip size={16} className="rotate-45" />
-          <span>Вкладення ({files.length})</span>
+          <span>Вкладення ({files?.length || 0})</span>
         </div>
         <Button
           variant="ghost"
@@ -193,7 +198,7 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
                 className="text-white hover:bg-blue-500/20"
                 onClick={(e) => {
                   e.stopPropagation();
-                  window.open(file.url, '_blank');
+                  if (file?.url) window.open(file.url, '_blank');
                 }}
               >
                 <Download size={18} />
@@ -204,7 +209,7 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
                 className="text-white hover:bg-red-500/20"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleDelete(file.url, index);
+                  if (file?.url) handleDelete(file.url, index);
                 }}
               >
                 <Trash2 size={18} />
