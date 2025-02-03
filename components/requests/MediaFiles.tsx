@@ -60,15 +60,19 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
       
       const { error: updateError } = await supabase
         .from('requests')
-        .update({ media_urls: updatedFiles })
-        .eq('id', requestId);
+        .update({ 
+          media_urls: updatedFiles,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', requestId)
+        .single();
       
       if (updateError) throw updateError;
       
       onUpdate(updatedFiles);
     } catch (error) {
       console.error('Error uploading files:', error);
-      alert('Помилка при завантаженні файлів');
+      alert(error instanceof Error ? error.message : 'Помилка при завантаженні файлів');
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -87,6 +91,14 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
         throw new Error('Invalid file path');
       }
 
+      const { error: deleteError } = await supabase.storage
+        .from('request-media')
+        .remove([filePath]);
+
+      if (deleteError) {
+        throw deleteError;
+      }
+
       const newFiles = files.filter((_, i) => i !== index);
       
       const { error: updateError } = await supabase
@@ -102,19 +114,10 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
         throw updateError;
       }
       
-      await supabase.storage
-        .from('request-media')
-        .remove([filePath])
-        .then(({ error }) => {
-          if (error) {
-            console.warn('Failed to delete file from storage:', error);
-          }
-        });
-      
       onUpdate(newFiles);
     } catch (error) {
       console.error('Error deleting file:', error);
-      alert('Помилка при видаленні файлу');
+      alert(error instanceof Error ? error.message : 'Помилка при видаленні файлу');
     }
   };
 
