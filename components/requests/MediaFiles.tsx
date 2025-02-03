@@ -80,16 +80,14 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
 
   const handleDelete = async (fileUrl: string, index: number) => {
     try {
-      // Отримуємо шлях до файлу з URL
-      const urlParts = fileUrl.split('/');
-      const fileName = urlParts[urlParts.length - 1];
-      const filePath = `${requestId}/${fileName}`;
+      // Отримуємо шлях до файлу
+      const filePath = fileUrl.split('request-media/')[1];
       
-      if (!fileName) return;
+      if (!filePath) return;
 
       const { error } = await supabase.storage
         .from('request-media')
-        .remove([filePath]);
+        .remove([decodeURIComponent(filePath)]);
 
       if (error) throw error;
 
@@ -150,6 +148,8 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
                   alt=""
                   fill
                   unoptimized
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  priority
                   className="object-cover"
                 />
               </div>
