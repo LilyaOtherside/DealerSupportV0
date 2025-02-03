@@ -219,9 +219,17 @@ export default function RequestsPage() {
                 <Separator className="my-3 bg-tg-theme-button/50" />
 
                 <div className="flex justify-between items-center text-sm">
-                  <div className="flex items-center gap-1.5">
-                    <Clock size={14} />
-                    {new Date(request.created_at).toLocaleDateString()}
+                  <div className="flex items-center gap-3 text-tg-theme-hint">
+                    <div className="flex items-center gap-1.5">
+                      <Clock size={14} />
+                      {new Date(request.created_at).toLocaleDateString()}
+                    </div>
+                    {request.media_urls.length > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <Paperclip size={14} className="rotate-45" />
+                        {request.media_urls.length}
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
