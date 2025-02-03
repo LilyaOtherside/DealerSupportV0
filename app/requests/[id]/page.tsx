@@ -102,25 +102,23 @@ export default function RequestPage({ params }: { params: { id: string } }) {
   };
 
   const handleDelete = async () => {
-    if (!request || !confirm('Ви впевнені, що хочете видалити цей запит?')) return;
-
+    if (!request) return;
+    
     setIsDeleting(true);
     try {
-      // Видаляємо медіа файли
+      // Спочатку видаляємо всі медіафайли
       if (request.media_urls.length > 0) {
-        const filesToDelete = request.media_urls.map(media => {
-          const url = new URL(media.url);
-          return url.pathname.split('/').pop()!;
-        });
-
+        const filePaths = request.media_urls.map(file => 
+          `${request.id}/${file.url.split('/').pop()?.split('?')[0]}`
+        );
+        
         const { error: storageError } = await supabase.storage
           .from('request-media')
-          .remove(filesToDelete);
-
+          .remove(filePaths);
+        
         if (storageError) throw storageError;
       }
-
-      // Видаляємо запит
+      
       const { error } = await supabase
         .from('requests')
         .delete()

@@ -79,10 +79,7 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
 
   const handleDelete = async (fileUrl: string, index: number) => {
     try {
-      const pathMatch = fileUrl.match(/request-media\/([^?]+)/);
-      if (!pathMatch) return;
-      
-      const filePath = decodeURIComponent(pathMatch[1]);
+      const filePath = `${requestId}/${fileUrl.split('/').pop()?.split('?')[0]}`;
       
       const { error: deleteError } = await supabase.storage
         .from('request-media')
