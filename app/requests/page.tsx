@@ -249,34 +249,6 @@ export default function RequestsPage() {
                     <ChevronRight className="w-4 h-4 text-tg-theme-hint" />
                   </div>
                 </div>
-
-                {request.media_urls.length > 0 && (
-                  <div className="flex gap-1 mt-3">
-                    {request.media_urls.slice(0, 3).map((media, index) => (
-                      <div
-                        key={index}
-                        className="w-12 h-12 rounded-lg bg-tg-theme-button/50 flex items-center justify-center overflow-hidden"
-                      >
-                        {media.type === 'image' ? (
-                          <img
-                            src={media.url}
-                            alt=""
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-lg">
-                            {media.type === 'video' ? '🎥' : '📄'}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                    {request.media_urls.length > 3 && (
-                      <div className="w-12 h-12 rounded-lg bg-tg-theme-button/50 flex items-center justify-center text-sm text-tg-theme-hint">
-                        +{request.media_urls.length - 3}
-                      </div>
-                    )}
-                  </div>
-                )}
               </button>
             ))}
           </div>
