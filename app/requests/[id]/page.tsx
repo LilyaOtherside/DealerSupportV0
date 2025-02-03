@@ -239,16 +239,53 @@ export default function RequestPage({ params }: { params: { id: string } }) {
         ) : (
           // Перегляд запиту
           <div className="space-y-6">
-            <div className="space-y-2">
-                <h1 className="text-xl font-semibold">{request.title}</h1>
-              <p className="text-tg-theme-hint">{request.description}</p>
+            <div className="bg-tg-theme-section/50 backdrop-blur-sm rounded-2xl p-4 space-y-4">
+              <div className="flex justify-between items-start gap-4">
+                <div className="flex-1">
+                  <h1 className="text-xl font-semibold mb-2">{request.title}</h1>
+                  <p className="text-tg-theme-hint">{request.description}</p>
+                </div>
+                <span className={`shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                  request.priority === 'high' 
+                    ? 'bg-red-500/10 text-red-500' 
+                    : request.priority === 'medium'
+                    ? 'bg-yellow-500/10 text-yellow-500'
+                    : 'bg-green-500/10 text-green-500'
+                }`}>
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                  {request.priority === 'low' ? 'Низький' : 
+                   request.priority === 'medium' ? 'Середній' : 'Високий'}
+                </span>
               </div>
+
+              <Separator className="bg-tg-theme-button/50" />
+
+              <div className="flex justify-between items-center text-sm">
+                <div className="flex items-center text-tg-theme-hint">
+                  <Clock className="w-4 h-4 mr-1" />
+                  {new Date(request.created_at).toLocaleDateString()}
+                </div>
+                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                  request.status === 'new' 
+                    ? 'bg-blue-500/10 text-blue-500'
+                    : request.status === 'in_progress'
+                    ? 'bg-yellow-500/10 text-yellow-500'
+                    : request.status === 'resolved'
+                    ? 'bg-green-500/10 text-green-500'
+                    : 'bg-gray-500/10 text-gray-500'
+                }`}>
+                  {request.status === 'new' ? 'Новий' :
+                   request.status === 'in_progress' ? 'В роботі' :
+                   request.status === 'resolved' ? 'Вирішено' : 'Закрито'}
+                </span>
+              </div>
+            </div>
 
             {/* Медіафайли */}
             <MediaFiles
               files={request.media_urls}
               requestId={request.id}
-              onUpdate={async (newFiles) => {
+              onUpdate={newFiles => {
                 setRequest({ ...request, media_urls: newFiles });
               }}
             />
