@@ -232,10 +232,6 @@ export default function RequestsPage() {
                 </div>
 
                 <div className="flex justify-between items-center text-xs">
-                  <div className="flex items-center text-tg-theme-hint">
-                    <Clock className="w-3 h-3 mr-1" />
-                    {new Date(request.created_at).toLocaleDateString()}
-                  </div>
                   <div className="flex items-center gap-2">
                     <span className={`inline-flex items-center px-2 py-1 rounded-full ${
                       request.status === 'new' 
