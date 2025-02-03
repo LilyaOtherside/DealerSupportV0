@@ -108,21 +108,24 @@ export default function RequestPage({ params }: { params: { id: string } }) {
     try {
       // Спочатку видаляємо всі медіафайли
       if (request.media_urls && request.media_urls.length > 0) {
-        const filePaths = request.media_urls.map(file => {
-          // Отримуємо повний шлях після bucket name
-          const path = file.url.split('request-media/')[1]?.split('?')[0];
-          return path;
-        });
+        // Отримуємо всі файли для видалення
+        const filePaths = request.media_urls
+          .map(file => file.url.split('request-media/')[1]?.split('?')[0])
+          .filter(Boolean);
         
         console.log('Deleting files:', filePaths);
         
+        // Видаляємо файли тільки якщо вони є
+        if (filePaths.length > 0) {
         const { error: storageError } = await supabase.storage
           .from('request-media')
-          .remove(filePaths.filter(Boolean));
+            .remove(filePaths);
         
         if (storageError) {
           console.error('Storage error:', storageError);
-          throw storageError;
+            // Продовжуємо видалення запиту навіть якщо виникла помилка з файлами
+            console.warn('Failed to delete some files, continuing with request deletion');
+          }
         }
       }
       
@@ -130,13 +133,15 @@ export default function RequestPage({ params }: { params: { id: string } }) {
       const { error } = await supabase
         .from('requests')
         .delete()
-        .eq('id', params.id);
+        .eq('id', params.id)
+        .single();
 
       if (error) {
         console.error('Delete error:', error);
         throw error;
       }
 
+      // Перенаправляємо тільки після успішного видалення
       router.push('/requests');
     } catch (error) {
       console.error('Error deleting request:', error);

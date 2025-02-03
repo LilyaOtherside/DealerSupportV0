@@ -88,25 +88,30 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
         throw new Error('Invalid file path');
       }
 
+      // Спочатку оновлюємо запит в базі даних
+      const newFiles = files.filter((_, i) => i !== index);
+      
+      const { error: updateError } = await supabase
+        .from('requests')
+        .update({ media_urls: newFiles })
+        .eq('id', requestId)
+        .single();
+      
+      if (updateError) {
+        console.error('Update error:', updateError);
+        throw updateError;
+      }
+
+      // Потім видаляємо файл зі сховища
       const { error: deleteError } = await supabase.storage
         .from('request-media')
         .remove([filePath]);
 
       if (deleteError) {
         console.error('Delete error:', deleteError);
-        throw deleteError;
-      }
-
-      const newFiles = files.filter((_, i) => i !== index);
-      
-      const { error: updateError } = await supabase
-        .from('requests')
-        .update({ media_urls: newFiles })
-        .eq('id', requestId);
-      
-      if (updateError) {
-        console.error('Update error:', updateError);
-        throw updateError;
+        // Якщо файл не вдалося видалити, але запит оновлено,
+        // продовжуємо роботу і показуємо попередження
+        console.warn('Failed to delete file from storage, but request was updated');
       }
       
       onUpdate(newFiles);
