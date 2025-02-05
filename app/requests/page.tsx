@@ -16,7 +16,6 @@ import {
   Loader2, 
   Filter, 
   Search, 
-  Sun, 
   User2,
   Paperclip
 } from 'lucide-react';
@@ -116,13 +115,7 @@ export default function RequestsPage() {
       {/* Верхня панель */}
       <div className="bg-tg-theme-bg/80 backdrop-blur-lg p-4 sticky top-0 z-10 safe-top">
         <div className="flex justify-between items-center mb-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full w-8 h-8 hover:bg-tg-theme-button/50"
-          >
-            <Sun className="h-5 w-5 text-tg-theme-hint" />
-          </Button>
+          <div className="w-8" />
           <div className="text-xl font-semibold">Запити</div>
           <Button
             variant="ghost"
@@ -202,12 +195,12 @@ export default function RequestsPage() {
               <button
                 key={request.id}
                 onClick={() => router.push(`/requests/${request.id}`)}
-                className="w-full bg-tg-theme-section/50 backdrop-blur-lg rounded-2xl p-4 text-left transition-all hover:bg-tg-theme-section hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full bg-tg-theme-section/50 backdrop-blur-lg rounded-2xl p-4 text-left transition-all hover:bg-tg-theme-section hover:scale-[1.02] active:scale-[0.98] flex flex-col"
               >
-                <div className="flex justify-between items-start gap-4">
+                <div className="flex justify-between items-start gap-4 min-h-[80px]">
                   <div className="flex-1">
-                    <h3 className="font-medium line-clamp-1 mb-1">{request.title}</h3>
-                    <p className="text-sm text-tg-theme-hint line-clamp-2 mb-3">
+                    <h3 className="font-medium line-clamp-1 mb-1.5">{request.title}</h3>
+                    <p className="text-sm text-tg-theme-hint line-clamp-2">
                       {request.description}
                     </p>
                   </div>

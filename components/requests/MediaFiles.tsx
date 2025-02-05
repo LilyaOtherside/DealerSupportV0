@@ -74,7 +74,10 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
 
           const { error: uploadError } = await supabase.storage
             .from('request-media')
-            .upload(filePath, file);
+            .upload(filePath, file, {
+              cacheControl: '3600',
+              contentType: file.type
+            });
 
           if (uploadError) throw uploadError;
 
@@ -265,12 +268,7 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
                   onClick={(e) => {
                     e.stopPropagation();
                     if (file?.url) {
-                      const link = document.createElement('a');
-                      link.href = file.url;
-                      link.download = file.originalName || '';
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
+                      window.open(file.url, '_blank');
                     }
                   }}
                 >
