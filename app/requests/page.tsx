@@ -195,26 +195,28 @@ export default function RequestsPage() {
               <button
                 key={request.id}
                 onClick={() => router.push(`/requests/${request.id}`)}
-                className="w-full bg-tg-theme-section/50 backdrop-blur-lg rounded-2xl p-4 text-left transition-all hover:bg-tg-theme-section hover:scale-[1.02] active:scale-[0.98] flex flex-col"
+                className="w-full bg-tg-theme-section/50 backdrop-blur-lg rounded-2xl p-4 text-left transition-all hover:bg-tg-theme-section hover:scale-[1.02] active:scale-[0.98]"
               >
-                <div className="flex justify-between items-start gap-4 min-h-[80px]">
-                  <div className="flex-1">
+                <div className="flex flex-col gap-3">
+                  <div className="flex justify-between items-start gap-4">
                     <h3 className="font-medium line-clamp-1 mb-1.5">{request.title}</h3>
+                    <span className={`shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                      request.priority === 'high' 
+                        ? 'bg-red-500/10 text-red-500' 
+                        : request.priority === 'medium'
+                        ? 'bg-yellow-500/10 text-yellow-500'
+                        : 'bg-green-500/10 text-green-500'
+                    }`}>
+                      <AlertCircle className="w-3 h-3 mr-1" />
+                      {request.priority === 'low' ? 'Низький' : 
+                       request.priority === 'medium' ? 'Середній' : 'Високий'}
+                    </span>
+                  </div>
+                  <div>
                     <p className="text-sm text-tg-theme-hint line-clamp-2">
                       {request.description}
                     </p>
                   </div>
-                  <span className={`shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                    request.priority === 'high' 
-                      ? 'bg-red-500/10 text-red-500' 
-                      : request.priority === 'medium'
-                      ? 'bg-yellow-500/10 text-yellow-500'
-                      : 'bg-green-500/10 text-green-500'
-                  }`}>
-                    <AlertCircle className="w-3 h-3 mr-1" />
-                    {request.priority === 'low' ? 'Низький' : 
-                     request.priority === 'medium' ? 'Середній' : 'Високий'}
-                  </span>
                 </div>
 
                 <Separator className="my-3 bg-tg-theme-button/50" />
