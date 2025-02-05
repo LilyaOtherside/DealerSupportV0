@@ -10,6 +10,8 @@ interface MediaFile {
   url: string;
   type: 'image' | 'video' | 'document';
   name?: string;
+  icon?: string;
+  originalName?: string;
 }
 
 interface MediaFilesProps {
@@ -63,7 +65,7 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
     try {
       const newMediaUrls = await Promise.all(
         Array.from(selectedFiles).map(async (file) => {
-          const fileExt = file.name.split('.').pop() || '';
+          const fileExt = file.name.split('.').pop()?.toLowerCase() || '';
           const cleanName = sanitizeFileName(file.name.replace(`.${fileExt}`, ''));
           const fileName = `${Date.now()}_${cleanName}.${fileExt}`;
           const filePath = `${requestId}/${fileName}`;
@@ -81,14 +83,22 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
             .getPublicUrl(filePath);
 
           const fileType: MediaFile['type'] = 
-            /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name) ? 'image' :
-            /\.(mp4|webm|mov)$/i.test(file.name) ? 'video' :
+            /\.(jpg|jpeg|png|gif|webp)$/i.test(fileExt) ? 'image' :
+            /\.(mp4|webm|mov)$/i.test(fileExt) ? 'video' :
             'document';
+
+          const documentIcon = 
+            /\.(doc|docx)$/i.test(fileExt) ? '📝' :
+            /\.(xls|xlsx)$/i.test(fileExt) ? '📊' :
+            /\.(pdf)$/i.test(fileExt) ? '📄' :
+            '📎';
 
           return {
             url: publicUrl,
             type: fileType,
-            name: fileName
+            name: fileName,
+            icon: fileType === 'document' ? documentIcon : undefined,
+            originalName: file.name
           };
         })
       );
@@ -205,11 +215,20 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
 
       <div className="flex flex-wrap gap-3">
         {normalizedFiles?.map((file, index) => {
-          // Визначаємо тип файлу за URL, якщо тип не вказано
           const fileType = file.type || (
             /\.(jpg|jpeg|png|gif|webp)$/i.test(file.url) ? 'image' :
             /\.(mp4|webm|mov)$/i.test(file.url) ? 'video' :
             'document'
+          );
+
+          const fileExt = file.originalName?.split('.').pop()?.toLowerCase() || 
+            file.url.split('.').pop()?.split('?')[0]?.toLowerCase() || '';
+
+          const documentIcon = file.icon || (
+            /\.(doc|docx)$/i.test(fileExt) ? '📝' :
+            /\.(xls|xlsx)$/i.test(fileExt) ? '📊' :
+            /\.(pdf)$/i.test(fileExt) ? '📄' :
+            '📎'
           );
 
           return (
@@ -229,9 +248,12 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
                   />
                 </div>
               ) : (
-                <div className="aspect-square flex items-center justify-center">
+                <div className="aspect-square flex flex-col items-center justify-center gap-2">
                   <span className="text-2xl">
-                    {fileType === 'video' ? '🎥' : '📄'}
+                    {fileType === 'video' ? '🎥' : documentIcon}
+                  </span>
+                  <span className="text-xs text-tg-theme-hint px-2 text-center truncate max-w-full">
+                    {file.originalName || fileExt.toUpperCase()}
                   </span>
                 </div>
               )}
@@ -242,7 +264,14 @@ export function MediaFiles({ files, requestId, onUpdate }: MediaFilesProps) {
                   className="text-white hover:bg-blue-500/20"
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (file?.url) window.open(file.url, '_blank');
+                    if (file?.url) {
+                      const link = document.createElement('a');
+                      link.href = file.url;
+                      link.download = file.originalName || '';
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }
                   }}
                 >
                   <Download size={18} />

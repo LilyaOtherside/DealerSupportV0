@@ -22,6 +22,14 @@ import {
 } from 'lucide-react';
 import { BottomNav } from "@/components/BottomNav";
 
+interface MediaFile {
+  url: string;
+  type: 'image' | 'video' | 'document';
+  name?: string;
+  icon?: string;
+  originalName?: string;
+}
+
 export default function RequestsPage() {
   const { user, loading } = useUser();
   const router = useRouter();
