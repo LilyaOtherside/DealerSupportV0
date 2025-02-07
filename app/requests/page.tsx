@@ -19,7 +19,7 @@ import {
   User2,
   Paperclip
 } from 'lucide-react';
-import { BottomNav } from "@/components/BottomNav";
+import { BottomNav } from "@/components/ui/BottomNav";
 
 interface MediaFile {
   url: string;
@@ -175,10 +175,10 @@ export default function RequestsPage() {
         </div>
 
         {/* Таби */}
-        <div className="w-full bg-tg-theme-section/50 backdrop-blur-lg rounded-xl p-1 mb-4">
+        <div className="w-full bg-tg-theme-section/50 backdrop-blur-lg rounded-lg p-0.5 mb-4">
           <nav className="flex gap-1 relative">
             <div
-              className="absolute h-[calc(100%-2px)] top-[1px] w-[calc(50%-2px)] bg-tg-theme-section rounded-lg transition-transform duration-300 ease-out"
+              className="absolute h-[calc(100%-2px)] top-[1px] w-[calc(50%-1px)] bg-tg-theme-section rounded-md transition-transform duration-300 ease-out"
               style={{
                 transform: `translateX(${activeTab === "requests" ? "1px" : "100%"})`,
               }}
@@ -188,7 +188,7 @@ export default function RequestsPage() {
                 setActiveTab("requests");
                 setShowArchived(false);
               }}
-              className={`flex-1 px-4 py-3 rounded-lg font-medium relative transition-colors duration-300 ${
+              className={`flex-1 px-3 py-2 rounded-md text-sm font-medium relative transition-colors duration-300 ${
                 activeTab === "requests" ? "text-white" : "text-tg-theme-hint"
               }`}
             >
@@ -199,7 +199,7 @@ export default function RequestsPage() {
                 setActiveTab("archive");
                 setShowArchived(true);
               }}
-              className={`flex-1 px-4 py-3 rounded-lg font-medium relative transition-colors duration-300 ${
+              className={`flex-1 px-3 py-2 rounded-md text-sm font-medium relative transition-colors duration-300 ${
                 activeTab === "archive" ? "text-white" : "text-tg-theme-hint"
               }`}
             >
@@ -209,7 +209,7 @@ export default function RequestsPage() {
         </div>
 
         {/* Список запитів */}
-        <div className="p-4 space-y-4">
+        <div className="p-4 pb-24 space-y-4">
           {requests.length === 0 || filteredRequests.length === 0 ? (
             <div className="bg-tg-theme-section/50 backdrop-blur-lg rounded-2xl p-8">
               <div className="text-center space-y-4">
