@@ -16,6 +16,7 @@ export interface Request {
   description: string;
   priority: 'low' | 'medium' | 'high';
   status: 'new' | 'in_progress' | 'resolved' | 'closed';
+  is_archived: boolean;
   media_urls: {
     url: string;
     type: 'image' | 'video' | 'document';

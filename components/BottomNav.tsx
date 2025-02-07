@@ -4,7 +4,12 @@ import React, { useState } from "react";
 import { useRouter } from 'next/navigation';
 import { Archive, Plus, MessageCircle } from "lucide-react";
 
-export const BottomNav = () => {
+interface BottomNavProps {
+  onArchiveClick: () => void;
+  isArchiveActive: boolean;
+}
+
+export const BottomNav = ({ onArchiveClick, isArchiveActive }: BottomNavProps) => {
   const [activeIcon, setActiveIcon] = useState("plus");
   const router = useRouter();
 
@@ -13,12 +18,17 @@ export const BottomNav = () => {
     router.push('/requests/new');
   };
 
+  const handleArchiveClick = () => {
+    setActiveIcon("archive");
+    onArchiveClick();
+  };
+
   return (
     <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center bg-black/80 backdrop-blur-lg rounded-full px-4 py-3 gap-8">
       <button
-        onClick={() => setActiveIcon("archive")}
+        onClick={handleArchiveClick}
         className={`relative transition-all duration-500 ease-in-out rounded-2xl p-2 hover:scale-110 active:scale-95 ${
-          activeIcon === "archive" 
+          isArchiveActive
             ? "text-white bg-gray-800/50 scale-110 px-4" 
             : "text-gray-400 hover:text-white hover:bg-gray-800/50"
         }`}
@@ -26,7 +36,7 @@ export const BottomNav = () => {
         <Archive
           size={22}
           className={`transform transition-all duration-500 ${
-            activeIcon === "archive" ? "rotate-12" : "hover:rotate-12"
+            isArchiveActive ? "rotate-12" : "hover:rotate-12"
           }`}
         />
       </button>

@@ -36,6 +36,7 @@ export default function RequestsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [showArchived, setShowArchived] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -49,12 +50,19 @@ export default function RequestsPage() {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (user) {
+      fetchRequests();
+    }
+  }, [showArchived]);
+
   const fetchRequests = async () => {
     try {
       const { data, error } = await supabase
         .from('requests')
         .select('*')
         .eq('user_id', user?.id)
+        .eq('is_archived', showArchived)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -257,7 +265,10 @@ export default function RequestsPage() {
         )}
       </div>
 
-      <BottomNav />
+      <BottomNav 
+        onArchiveClick={() => setShowArchived(!showArchived)}
+        isArchiveActive={showArchived}
+      />
     </div>
   );
 } 
