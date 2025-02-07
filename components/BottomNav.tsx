@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from 'next/navigation';
-import { Archive, Plus, Settings } from "lucide-react";
+import { Archive, Plus, MessageCircle } from "lucide-react";
 
 export const BottomNav = () => {
   const [activeIcon, setActiveIcon] = useState("plus");
@@ -46,17 +46,17 @@ export const BottomNav = () => {
         />
       </button>
       <button
-        onClick={() => setActiveIcon("settings")}
+        onClick={() => setActiveIcon("chat")}
         className={`relative transition-all duration-500 ease-in-out rounded-2xl p-2 hover:scale-110 active:scale-95 ${
-          activeIcon === "settings" 
+          activeIcon === "chat" 
             ? "text-white bg-gray-800/50 scale-110 px-4" 
             : "text-gray-400 hover:text-white hover:bg-gray-800/50"
         }`}
       >
-        <Settings
+        <MessageCircle
           size={22}
           className={`transform transition-all duration-500 ${
-            activeIcon === "settings" ? "rotate-45" : "hover:rotate-45"
+            activeIcon === "chat" ? "rotate-12" : "hover:rotate-12"
           }`}
         />
       </button>
