@@ -124,7 +124,7 @@ export default function RequestsPage() {
       <div className="bg-tg-theme-bg/80 backdrop-blur-lg p-4 sticky top-0 z-10 safe-top">
         <div className="flex justify-between items-center mb-4">
           <div className="w-8" />
-          <div className="text-xl font-semibold">Запити</div>
+          <div className="text-xl font-semibold">{showArchived ? 'Архів' : 'Запити'}</div>
           <Button
             variant="ghost"
             size="icon"

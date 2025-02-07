@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from 'next/navigation';
-import { Archive, Plus, MessageCircle } from "lucide-react";
+import { Archive, Plus, MessageCircle, Home } from "lucide-react";
 
 interface BottomNavProps {
   onArchiveClick: () => void;
@@ -12,6 +12,14 @@ interface BottomNavProps {
 export const BottomNav = ({ onArchiveClick, isArchiveActive }: BottomNavProps) => {
   const [activeIcon, setActiveIcon] = useState("plus");
   const router = useRouter();
+
+  const handleHomeClick = () => {
+    setActiveIcon("home");
+    if (isArchiveActive) {
+      onArchiveClick();
+    }
+    router.push('/requests');
+  };
 
   const handlePlusClick = () => {
     setActiveIcon("plus");
@@ -37,6 +45,21 @@ export const BottomNav = ({ onArchiveClick, isArchiveActive }: BottomNavProps) =
           size={22}
           className={`transform transition-all duration-500 ${
             isArchiveActive ? "rotate-12" : "hover:rotate-12"
+          }`}
+        />
+      </button>
+      <button
+        onClick={handleHomeClick}
+        className={`relative transition-all duration-500 ease-in-out rounded-2xl p-2 hover:scale-110 active:scale-95 ${
+          activeIcon === "home" 
+            ? "text-white bg-gray-800/50 scale-110 px-4" 
+            : "text-gray-400 hover:text-white hover:bg-gray-800/50"
+        }`}
+      >
+        <Home
+          size={22}
+          className={`transform transition-all duration-500 ${
+            activeIcon === "home" ? "rotate-12" : "hover:rotate-12"
           }`}
         />
       </button>
