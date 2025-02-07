@@ -37,6 +37,7 @@ export default function RequestsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [showArchived, setShowArchived] = useState(false);
+  const [activeTab, setActiveTab] = useState<"requests" | "archive">("requests");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -54,7 +55,7 @@ export default function RequestsPage() {
     if (user) {
       fetchRequests();
     }
-  }, [showArchived]);
+  }, [activeTab]);
 
   const fetchRequests = async () => {
     try {
@@ -62,7 +63,7 @@ export default function RequestsPage() {
         .from('requests')
         .select('*')
         .eq('user_id', user?.id)
-        .eq('is_archived', showArchived)
+        .eq('is_archived', activeTab === "archive")
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -124,7 +125,7 @@ export default function RequestsPage() {
       <div className="bg-tg-theme-bg/80 backdrop-blur-lg p-4 sticky top-0 z-10 safe-top">
         <div className="flex justify-between items-center mb-4">
           <div className="w-8" />
-          <div className="text-xl font-semibold">{showArchived ? 'Архів' : 'Запити'}</div>
+          <div className="text-xl font-semibold">Запити</div>
           <Button
             variant="ghost"
             size="icon"
@@ -172,102 +173,140 @@ export default function RequestsPage() {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Список запитів */}
-      <div className="p-4 space-y-4">
-        {requests.length === 0 || filteredRequests.length === 0 ? (
-          <div className="bg-tg-theme-section/50 backdrop-blur-lg rounded-2xl p-8">
-            <div className="text-center space-y-4">
-              <div className="bg-blue-500/10 rounded-full p-4 w-fit mx-auto">
-                <MessageCircle className="h-8 w-8 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-lg font-medium mb-1">Немає запитів</p>
-                <p className="text-tg-theme-hint text-sm mb-4">
-                  Створіть свій перший запит для підтримки
-                </p>
-                <Button
-                  onClick={() => router.push('/requests/new')}
-                  className="bg-blue-500 hover:bg-blue-600"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Створити запит
-                </Button>
+        {/* Таби */}
+        <div className="w-full bg-tg-theme-section/50 backdrop-blur-lg rounded-xl p-1 mb-4">
+          <nav className="flex gap-1 relative">
+            <div
+              className="absolute h-[calc(100%-2px)] top-[1px] w-[calc(50%-2px)] bg-tg-theme-section rounded-lg transition-transform duration-300 ease-out"
+              style={{
+                transform: `translateX(${activeTab === "requests" ? "1px" : "100%"})`,
+              }}
+            />
+            <button
+              onClick={() => {
+                setActiveTab("requests");
+                setShowArchived(false);
+              }}
+              className={`flex-1 px-4 py-3 rounded-lg font-medium relative transition-colors duration-300 ${
+                activeTab === "requests" ? "text-white" : "text-tg-theme-hint"
+              }`}
+            >
+              Запити
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab("archive");
+                setShowArchived(true);
+              }}
+              className={`flex-1 px-4 py-3 rounded-lg font-medium relative transition-colors duration-300 ${
+                activeTab === "archive" ? "text-white" : "text-tg-theme-hint"
+              }`}
+            >
+              Архів
+            </button>
+          </nav>
+        </div>
+
+        {/* Список запитів */}
+        <div className="p-4 space-y-4">
+          {requests.length === 0 || filteredRequests.length === 0 ? (
+            <div className="bg-tg-theme-section/50 backdrop-blur-lg rounded-2xl p-8">
+              <div className="text-center space-y-4">
+                <div className="bg-blue-500/10 rounded-full p-4 w-fit mx-auto">
+                  <MessageCircle className="h-8 w-8 text-blue-500" />
+                </div>
+                <div>
+                  <p className="text-lg font-medium mb-1">Немає запитів</p>
+                  <p className="text-tg-theme-hint text-sm mb-4">
+                    Створіть свій перший запит для підтримки
+                  </p>
+                  <Button
+                    onClick={() => router.push('/requests/new')}
+                    className="bg-blue-500 hover:bg-blue-600"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Створити запит
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {filteredRequests.map((request) => (
-              <button
-                key={request.id}
-                onClick={() => router.push(`/requests/${request.id}`)}
-                className="w-full bg-tg-theme-section/50 backdrop-blur-lg rounded-2xl p-4 text-left transition-all hover:bg-tg-theme-section hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <div className="flex flex-col gap-3">
-                  <div className="flex justify-between items-start gap-4">
-                    <h3 className="font-medium line-clamp-1 mb-1.5">{request.title}</h3>
-                    <span className={`shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                      request.priority === 'high' 
-                        ? 'bg-red-500/10 text-red-500' 
-                        : request.priority === 'medium'
-                        ? 'bg-yellow-500/10 text-yellow-500'
-                        : 'bg-green-500/10 text-green-500'
-                    }`}>
-                      <AlertCircle className="w-3 h-3 mr-1" />
-                      {request.priority === 'low' ? 'Низький' : 
-                       request.priority === 'medium' ? 'Середній' : 'Високий'}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-sm text-tg-theme-hint line-clamp-2">
-                      {request.description}
-                    </p>
-                  </div>
-                </div>
-
-                <Separator className="my-3 bg-tg-theme-button/50" />
-
-                <div className="flex justify-between items-center text-sm">
-                  <div className="flex items-center gap-3 text-tg-theme-hint">
-                    <div className="flex items-center gap-1.5">
-                      <Clock size={14} />
-                      {new Date(request.created_at).toLocaleDateString()}
+          ) : (
+            <div className="space-y-3">
+              {filteredRequests.map((request) => (
+                <button
+                  key={request.id}
+                  onClick={() => router.push(`/requests/${request.id}`)}
+                  className="w-full bg-tg-theme-section/50 backdrop-blur-lg rounded-2xl p-4 text-left transition-all hover:bg-tg-theme-section hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <div className="flex flex-col gap-3">
+                    <div className="flex justify-between items-start gap-4">
+                      <h3 className="font-medium line-clamp-1 mb-1.5">{request.title}</h3>
+                      <span className={`shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                        request.priority === 'high' 
+                          ? 'bg-red-500/10 text-red-500' 
+                          : request.priority === 'medium'
+                          ? 'bg-yellow-500/10 text-yellow-500'
+                          : 'bg-green-500/10 text-green-500'
+                      }`}>
+                        <AlertCircle className="w-3 h-3 mr-1" />
+                        {request.priority === 'low' ? 'Низький' : 
+                         request.priority === 'medium' ? 'Середній' : 'Високий'}
+                      </span>
                     </div>
-                    {request.media_urls.length > 0 && (
+                    <div>
+                      <p className="text-sm text-tg-theme-hint line-clamp-2">
+                        {request.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <Separator className="my-3 bg-tg-theme-button/50" />
+
+                  <div className="flex justify-between items-center text-sm">
+                    <div className="flex items-center gap-3 text-tg-theme-hint">
                       <div className="flex items-center gap-1.5">
-                        <Paperclip size={14} className="rotate-45" />
-                        {request.media_urls.length}
+                        <Clock size={14} />
+                        {new Date(request.created_at).toLocaleDateString()}
                       </div>
-                    )}
+                      {request.media_urls.length > 0 && (
+                        <div className="flex items-center gap-1.5">
+                          <Paperclip size={14} className="rotate-45" />
+                          {request.media_urls.length}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                        request.status === 'new' 
+                          ? 'bg-blue-500/10 text-blue-500'
+                          : request.status === 'in_progress'
+                          ? 'bg-yellow-500/10 text-yellow-500'
+                          : request.status === 'resolved'
+                          ? 'bg-green-500/10 text-green-500'
+                          : 'bg-gray-500/10 text-gray-500'
+                      }`}>
+                        {request.status === 'new' ? 'Новий' :
+                         request.status === 'in_progress' ? 'В роботі' :
+                         request.status === 'resolved' ? 'Вирішено' : 'Закрито'}
+                      </span>
+                      <ChevronRight className="w-4 h-4 text-tg-theme-hint" />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      request.status === 'new' 
-                        ? 'bg-blue-500/10 text-blue-500'
-                        : request.status === 'in_progress'
-                        ? 'bg-yellow-500/10 text-yellow-500'
-                        : request.status === 'resolved'
-                        ? 'bg-green-500/10 text-green-500'
-                        : 'bg-gray-500/10 text-gray-500'
-                    }`}>
-                      {request.status === 'new' ? 'Новий' :
-                       request.status === 'in_progress' ? 'В роботі' :
-                       request.status === 'resolved' ? 'Вирішено' : 'Закрито'}
-                    </span>
-                    <ChevronRight className="w-4 h-4 text-tg-theme-hint" />
-                  </div>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <BottomNav 
-        onArchiveClick={() => setShowArchived(!showArchived)}
-        isArchiveActive={showArchived}
+        onArchiveClick={() => {
+          const newTab = activeTab === "archive" ? "requests" : "archive";
+          setActiveTab(newTab);
+          setShowArchived(newTab === "archive");
+        }}
+        isArchiveActive={activeTab === "archive"}
       />
     </div>
   );
