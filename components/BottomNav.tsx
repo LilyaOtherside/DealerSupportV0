@@ -32,7 +32,7 @@ export const BottomNav = ({ onArchiveClick, isArchiveActive }: BottomNavProps) =
   };
 
   return (
-    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center bg-black/80 backdrop-blur-lg rounded-full px-4 py-3 gap-8 safe-bottom">
+    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center bg-black/80 backdrop-blur-lg rounded-full px-4 py-3 gap-8">
       <button
         onClick={handleArchiveClick}
         className={`relative transition-all duration-500 ease-in-out rounded-2xl p-2 hover:scale-110 active:scale-95 ${
