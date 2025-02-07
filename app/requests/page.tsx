@@ -19,7 +19,7 @@ import {
   User2,
   Paperclip
 } from 'lucide-react';
-import { BottomNav } from "@/components/BottomNav";
+import { BottomNav } from "@/components/ui/BottomNav";
 
 interface MediaFile {
   url: string;
@@ -209,7 +209,7 @@ export default function RequestsPage() {
         </div>
 
         {/* Список запитів */}
-        <div className="p-4 pb-24 space-y-4">
+        <div className="p-4 pb-28 space-y-4">
           {requests.length === 0 || filteredRequests.length === 0 ? (
             <div className="bg-tg-theme-section/50 backdrop-blur-lg rounded-2xl p-8">
               <div className="text-center space-y-4">
