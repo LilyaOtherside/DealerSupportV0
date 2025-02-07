@@ -19,7 +19,7 @@ import {
   User2,
   Paperclip
 } from 'lucide-react';
-import { BottomNav } from "@/components/ui/BottomNav";
+import { BottomNav } from "@/components/BottomNav";
 
 interface MediaFile {
   url: string;
