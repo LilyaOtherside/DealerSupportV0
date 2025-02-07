@@ -304,7 +304,7 @@ export default function RequestPage({ params }: { params: { id: string } }) {
         </AlertDialog>
           <Button
             variant="outline"
-            className="flex-1 h-12 text-base font-medium"
+            className="flex-1 h-12 text-base font-medium bg-white hover:bg-gray-100 text-gray-900"
             onClick={handleArchiveToggle}
             disabled={isArchiving}
           >
