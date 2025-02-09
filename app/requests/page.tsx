@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { Request } from '@/app/types';
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Tabs } from "@/components/ui/tabs";
 import { 
   Plus, 
   Clock, 
@@ -37,6 +38,11 @@ export default function RequestsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [showArchived, setShowArchived] = useState(false);
+
+  const tabs = [
+    { id: 'requests', label: 'Запити' },
+    { id: 'archive', label: 'Архів' }
+  ];
 
   useEffect(() => {
     if (!loading && !user) {
@@ -124,7 +130,7 @@ export default function RequestsPage() {
       <div className="bg-tg-theme-bg/80 backdrop-blur-lg p-4 sticky top-0 z-10 safe-top">
         <div className="flex justify-between items-center mb-4">
           <div className="w-8" />
-          <div className="text-xl font-semibold">{showArchived ? 'Архів' : 'Запити'}</div>
+          <div className="text-xl font-semibold">Запити</div>
           <Button
             variant="ghost"
             size="icon"
@@ -172,6 +178,14 @@ export default function RequestsPage() {
             </div>
           </div>
         </div>
+
+        {/* Tabs */}
+        <Tabs
+          tabs={tabs}
+          activeTab={showArchived ? 'archive' : 'requests'}
+          onChange={(tabId) => setShowArchived(tabId === 'archive')}
+          className="mb-4"
+        />
       </div>
 
       {/* Список запитів */}
