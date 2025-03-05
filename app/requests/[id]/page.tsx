@@ -29,7 +29,9 @@ import {
   Clock,
   AlertCircle,
   Archive,
-  ArchiveRestore
+  ArchiveRestore,
+  MessageCircle,
+  Share2
 } from 'lucide-react';
 import { MediaFiles } from '@/components/requests/MediaFiles';
 
@@ -177,6 +179,26 @@ export default function RequestPage({ params }: { params: { id: string } }) {
     }
   };
 
+  const handleShare = async () => {
+    if (!request) return;
+    
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: request.title,
+          text: `Запит: ${request.title}`,
+          url: window.location.href
+        });
+      } else {
+        // Fallback для браузерів, які не підтримують Web Share API
+        navigator.clipboard.writeText(window.location.href);
+        alert('Посилання скопійовано в буфер обміну');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen bg-tg-theme-bg">
@@ -209,16 +231,28 @@ export default function RequestPage({ params }: { params: { id: string } }) {
           <div className="text-xl font-semibold flex-1 truncate">
             {isEditing ? 'Редагування запиту' : request?.title || 'Запит'}
           </div>
-          {!isEditing && !isDeleting && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => router.push(`/requests/edit/${params.id}`)}
-              className="text-tg-theme-hint hover:bg-tg-theme-button/50"
-            >
-              <Edit className="h-5 w-5" />
-            </Button>
-          )}
+          <div className="flex items-center gap-1">
+            {!isEditing && !isDeleting && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => router.push(`/requests/edit/${params.id}`)}
+                  className="text-tg-theme-hint hover:bg-tg-theme-button/50"
+                >
+                  <Edit className="h-5 w-5" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleShare}
+                  className="text-tg-theme-hint hover:bg-tg-theme-button/50"
+                >
+                  <Share2 className="h-5 w-5" />
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -334,6 +368,19 @@ export default function RequestPage({ params }: { params: { id: string } }) {
           </Button>
         </div>
       )}
+
+      {/* Кнопка для відповіді на запит */}
+      <div className="fixed bottom-24 right-4 z-10">
+        <Button
+          onClick={() => {
+            // Тут можна додати логіку для відповіді на запит
+            alert('Функціонал відповіді на запит буде додано пізніше');
+          }}
+          className="h-14 w-14 rounded-full bg-blue-500 hover:bg-blue-600 shadow-lg"
+        >
+          <MessageCircle className="h-6 w-6" />
+        </Button>
+      </div>
     </div>
   );
 } 

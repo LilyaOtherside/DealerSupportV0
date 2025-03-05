@@ -19,7 +19,8 @@ import {
   FileVideo,
   File,
   Loader2,
-  Save
+  Save,
+  Check
 } from 'lucide-react';
 
 type Priority = 'low' | 'medium' | 'high';
@@ -41,6 +42,7 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -95,7 +97,11 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
 
       if (error) throw error;
 
-      router.push(`/requests/${params.id}`);
+      setSuccessMessage('Запит успішно оновлено');
+      
+      setTimeout(() => {
+        router.push(`/requests/${params.id}`);
+      }, 2000);
     } catch (error) {
       console.error('Error updating request:', error);
       if (error instanceof Error) {
@@ -103,7 +109,6 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
       } else {
         alert('Помилка при оновленні запиту');
       }
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -158,6 +163,14 @@ export default function EditRequestPage({ params }: { params: { id: string } }) 
           <div className="w-10" />
         </div>
       </div>
+
+      {/* Повідомлення про успішне оновлення */}
+      {successMessage && (
+        <div className="fixed top-20 left-0 right-0 mx-auto w-4/5 bg-green-500/90 text-white p-3 rounded-lg z-50 flex items-center justify-center gap-2 backdrop-blur-sm">
+          <Check className="h-5 w-5" />
+          {successMessage}
+        </div>
+      )}
 
       {/* Форма */}
       <form onSubmit={handleUpdateRequest} className="p-4 space-y-6">

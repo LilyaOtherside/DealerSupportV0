@@ -9,6 +9,17 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs } from "@/components/ui/tabs";
 import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { 
   Plus, 
   Clock, 
   AlertCircle, 
@@ -19,6 +30,7 @@ import {
   Search, 
   User2,
   Edit2,
+  Trash2,
   Paperclip
 } from 'lucide-react';
 import { BottomNav } from "@/components/BottomNav";
@@ -39,6 +51,8 @@ export default function RequestsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [showArchived, setShowArchived] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [requestToDelete, setRequestToDelete] = useState<string | null>(null);
 
   const tabs = [
     { id: 'requests', label: 'Запити' },
@@ -116,6 +130,30 @@ export default function RequestsPage() {
     const matchesStatus = filterStatus === "all" || req.status === filterStatus;
     return matchesQuery && matchesStatus;
   });
+
+  const handleDeleteRequest = async (requestId: string) => {
+    if (!user) return;
+    
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('requests')
+        .delete()
+        .eq('id', requestId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      
+      // Оновлюємо список запитів після видалення
+      setRequests(prev => prev.filter(req => req.id !== requestId));
+    } catch (error) {
+      console.error('Error deleting request:', error);
+      alert('Помилка при видаленні запиту');
+    } finally {
+      setIsDeleting(false);
+      setRequestToDelete(null);
+    }
+  };
 
   if (loading || isLoading) {
     return (
@@ -198,17 +236,23 @@ export default function RequestsPage() {
                 <MessageCircle className="h-8 w-8 text-blue-500" />
               </div>
               <div>
-                <p className="text-lg font-medium mb-1">Немає запитів</p>
-                <p className="text-tg-theme-hint text-sm mb-4">
-                  Створіть свій перший запит для підтримки
+                <p className="text-lg font-medium mb-1">
+                  {showArchived ? 'Архів порожній' : 'Немає запитів'}
                 </p>
-                <Button
-                  onClick={() => router.push('/requests/new')}
-                  className="bg-blue-500 hover:bg-blue-600"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Створити запит
-                </Button>
+                <p className="text-tg-theme-hint text-sm mb-4">
+                  {showArchived 
+                    ? 'У вас немає архівованих запитів' 
+                    : 'Створіть свій перший запит для підтримки'}
+                </p>
+                {!showArchived && (
+                  <Button
+                    onClick={() => router.push('/requests/new')}
+                    className="bg-blue-500 hover:bg-blue-600"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Створити запит
+                  </Button>
+                )}
               </div>
             </div>
           </div>
@@ -239,17 +283,54 @@ export default function RequestsPage() {
                         {request.priority === 'low' ? 'Низький' : 
                          request.priority === 'medium' ? 'Середній' : 'Високий'}
                       </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-7 w-7 rounded-full text-tg-theme-hint hover:text-white hover:bg-tg-theme-button/50"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          router.push(`/requests/edit/${request.id}`);
-                        }}
-                      >
-                        <Edit2 size={14} />
-                      </Button>
+                      <div className="flex items-center">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 rounded-full text-tg-theme-hint hover:text-white hover:bg-tg-theme-button/50"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/requests/edit/${request.id}`);
+                          }}
+                        >
+                          <Edit2 size={14} />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 rounded-full text-tg-theme-hint hover:text-red-500 hover:bg-red-500/10"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setRequestToDelete(request.id);
+                              }}
+                            >
+                              <Trash2 size={14} />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="bg-tg-theme-bg/95 backdrop-blur-xl border-tg-theme-section">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="text-xl">Видалити запит?</AlertDialogTitle>
+                              <AlertDialogDescription className="text-tg-theme-hint">
+                                Ця дія не може бути скасована. Запит буде видалено назавжди.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="bg-tg-theme-section/50 border-0 hover:bg-tg-theme-section">
+                                Скасувати
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => requestToDelete && handleDeleteRequest(requestToDelete)}
+                                className="bg-red-500 hover:bg-red-600"
+                                disabled={isDeleting}
+                              >
+                                {isDeleting ? 'Видалення...' : 'Видалити'}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </div>
                   </div>
                   <div>
@@ -302,6 +383,18 @@ export default function RequestsPage() {
           </div>
         )}
       </div>
+
+      {/* Кнопка створення нового запиту */}
+      {!showArchived && (
+        <div className="fixed bottom-24 right-4 z-10">
+          <Button
+            onClick={() => router.push('/requests/new')}
+            className="h-14 w-14 rounded-full bg-blue-500 hover:bg-blue-600 shadow-lg"
+          >
+            <Plus className="h-6 w-6" />
+          </Button>
+        </div>
+      )}
 
       <BottomNav 
         onArchiveClick={() => setShowArchived(!showArchived)}
