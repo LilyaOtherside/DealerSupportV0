@@ -201,12 +201,24 @@ export default function RequestPage({ params }: { params: { id: string } }) {
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-full w-8 h-8 hover:bg-tg-theme-button/50"
             onClick={() => router.back()}
+            className="text-tg-theme-hint hover:bg-tg-theme-button/50"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <div className="text-lg font-medium">Запит #{request.id.slice(0, 8)}</div>
+          <div className="text-xl font-semibold flex-1 truncate">
+            {isEditing ? 'Редагування запиту' : request?.title || 'Запит'}
+          </div>
+          {!isEditing && !isDeleting && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.push(`/requests/edit/${params.id}`)}
+              className="text-tg-theme-hint hover:bg-tg-theme-button/50"
+            >
+              <Edit className="h-5 w-5" />
+            </Button>
+          )}
         </div>
       </div>
 

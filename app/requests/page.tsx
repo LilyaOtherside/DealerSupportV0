@@ -18,9 +18,10 @@ import {
   Filter, 
   Search, 
   User2,
+  Edit2,
   Paperclip
 } from 'lucide-react';
-import { BottomNav } from "@/components/BottomNav";
+import { BottomNav } from "@/components/ui/BottomNav";
 
 interface MediaFile {
   url: string;
@@ -214,28 +215,48 @@ export default function RequestsPage() {
         ) : (
           <div className="space-y-3">
             {filteredRequests.map((request) => (
-              <button
+              <div
                 key={request.id}
-                onClick={() => router.push(`/requests/${request.id}`)}
-                className="w-full bg-tg-theme-section/50 backdrop-blur-lg rounded-2xl p-4 text-left transition-all hover:bg-tg-theme-section hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full bg-tg-theme-section/50 backdrop-blur-lg rounded-2xl p-4 text-left transition-all hover:bg-tg-theme-section"
               >
                 <div className="flex flex-col gap-3">
                   <div className="flex justify-between items-start gap-4">
-                    <h3 className="font-medium line-clamp-1 mb-1.5">{request.title}</h3>
-                    <span className={`shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                      request.priority === 'high' 
-                        ? 'bg-red-500/10 text-red-500' 
-                        : request.priority === 'medium'
-                        ? 'bg-yellow-500/10 text-yellow-500'
-                        : 'bg-green-500/10 text-green-500'
-                    }`}>
-                      <AlertCircle className="w-3 h-3 mr-1" />
-                      {request.priority === 'low' ? 'Низький' : 
-                       request.priority === 'medium' ? 'Середній' : 'Високий'}
-                    </span>
+                    <h3 
+                      className="font-medium line-clamp-1 mb-1.5 cursor-pointer"
+                      onClick={() => router.push(`/requests/${request.id}`)}
+                    >
+                      {request.title}
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <span className={`shrink-0 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                        request.priority === 'high' 
+                          ? 'bg-red-500/10 text-red-500' 
+                          : request.priority === 'medium'
+                          ? 'bg-yellow-500/10 text-yellow-500'
+                          : 'bg-green-500/10 text-green-500'
+                      }`}>
+                        <AlertCircle className="w-3 h-3 mr-1" />
+                        {request.priority === 'low' ? 'Низький' : 
+                         request.priority === 'medium' ? 'Середній' : 'Високий'}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 rounded-full text-tg-theme-hint hover:text-white hover:bg-tg-theme-button/50"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/requests/edit/${request.id}`);
+                        }}
+                      >
+                        <Edit2 size={14} />
+                      </Button>
+                    </div>
                   </div>
                   <div>
-                    <p className="text-sm text-tg-theme-hint line-clamp-2">
+                    <p 
+                      className="text-sm text-tg-theme-hint line-clamp-2 cursor-pointer"
+                      onClick={() => router.push(`/requests/${request.id}`)}
+                    >
                       {request.description}
                     </p>
                   </div>
@@ -256,7 +277,10 @@ export default function RequestsPage() {
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div 
+                    className="flex items-center gap-2 cursor-pointer"
+                    onClick={() => router.push(`/requests/${request.id}`)}
+                  >
                     <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                       request.status === 'new' 
                         ? 'bg-blue-500/10 text-blue-500'
@@ -273,7 +297,7 @@ export default function RequestsPage() {
                     <ChevronRight className="w-4 h-4 text-tg-theme-hint" />
                   </div>
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         )}
