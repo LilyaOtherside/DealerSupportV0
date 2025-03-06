@@ -368,19 +368,6 @@ export default function RequestPage({ params }: { params: { id: string } }) {
           </Button>
         </div>
       )}
-
-      {/* Кнопка для відповіді на запит */}
-      <div className="fixed bottom-24 right-4 z-10">
-        <Button
-          onClick={() => {
-            // Тут можна додати логіку для відповіді на запит
-            alert('Функціонал відповіді на запит буде додано пізніше');
-          }}
-          className="h-14 w-14 rounded-full bg-blue-500 hover:bg-blue-600 shadow-lg"
-        >
-          <MessageCircle className="h-6 w-6" />
-        </Button>
-      </div>
     </div>
   );
 } 

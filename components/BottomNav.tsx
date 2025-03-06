@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from "react";
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from "react";
+import { useRouter, usePathname } from 'next/navigation';
 import { Archive, Plus, MessageCircle, Home } from "lucide-react";
 
 interface BottomNavProps {
@@ -10,8 +10,22 @@ interface BottomNavProps {
 }
 
 export const BottomNav = ({ onArchiveClick, isArchiveActive }: BottomNavProps) => {
-  const [activeIcon, setActiveIcon] = useState("plus");
   const router = useRouter();
+  const pathname = usePathname();
+
+  // Визначаємо активну іконку на основі поточного шляху
+  const getActiveIcon = () => {
+    if (pathname.includes('/requests/new')) return 'plus';
+    if (pathname.includes('/requests/') && !pathname.includes('/edit/')) return 'chat';
+    return 'home';
+  };
+
+  const [activeIcon, setActiveIcon] = useState(getActiveIcon());
+
+  // Оновлюємо активну іконку при зміні шляху
+  useEffect(() => {
+    setActiveIcon(getActiveIcon());
+  }, [pathname]);
 
   const handleHomeClick = () => {
     setActiveIcon("home");
@@ -32,7 +46,7 @@ export const BottomNav = ({ onArchiveClick, isArchiveActive }: BottomNavProps) =
   };
 
   return (
-    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center bg-black/80 backdrop-blur-lg rounded-full px-4 py-3 gap-8">
+    <nav className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center bg-black/80 backdrop-blur-lg rounded-full px-4 py-3 gap-8 z-50">
       <button
         onClick={handleArchiveClick}
         className={`relative transition-all duration-500 ease-in-out rounded-2xl p-2 hover:scale-110 active:scale-95 ${
@@ -44,7 +58,7 @@ export const BottomNav = ({ onArchiveClick, isArchiveActive }: BottomNavProps) =
         <Archive
           size={22}
           className={`transform transition-all duration-500 ${
-            isArchiveActive ? "rotate-12" : "hover:rotate-12"
+            activeIcon === "archive" ? "rotate-12" : "hover:rotate-12"
           }`}
         />
       </button>
@@ -79,7 +93,16 @@ export const BottomNav = ({ onArchiveClick, isArchiveActive }: BottomNavProps) =
         />
       </button>
       <button
-        onClick={() => setActiveIcon("chat")}
+        onClick={() => {
+          if (pathname.includes('/requests/') && !pathname.includes('/edit/') && !pathname.includes('/new')) {
+            // Якщо ми вже на сторінці запиту, можна додати логіку для відповіді
+            alert('Функціонал відповіді на запит буде додано пізніше');
+          } else {
+            // Інакше перенаправляємо на список запитів
+            router.push('/requests');
+          }
+          setActiveIcon("chat");
+        }}
         className={`relative transition-all duration-500 ease-in-out rounded-2xl p-2 hover:scale-110 active:scale-95 ${
           activeIcon === "chat" 
             ? "text-white bg-gray-800/50 scale-110 px-4" 
