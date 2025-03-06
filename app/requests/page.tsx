@@ -384,18 +384,6 @@ export default function RequestsPage() {
         )}
       </div>
 
-      {/* Кнопка створення нового запиту */}
-      {!showArchived && (
-        <div className="fixed bottom-24 right-4 z-10">
-          <Button
-            onClick={() => router.push('/requests/new')}
-            className="h-14 w-14 rounded-full bg-blue-500 hover:bg-blue-600 shadow-lg"
-          >
-            <Plus className="h-6 w-6" />
-          </Button>
-        </div>
-      )}
-
       <BottomNav 
         onArchiveClick={() => setShowArchived(!showArchived)}
         isArchiveActive={showArchived}
