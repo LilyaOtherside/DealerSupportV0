@@ -39,7 +39,7 @@ export const BottomNav = ({ onArchiveClick, isArchiveActive }: BottomNavProps) =
       try {
         const { count, error } = await supabase
           .from('messages')
-          .select('*', { count: 'exact' })
+          .select('id', { count: 'exact' })
           .eq('is_read', false)
           .not('user_id', 'eq', user.id);
         
@@ -47,6 +47,7 @@ export const BottomNav = ({ onArchiveClick, isArchiveActive }: BottomNavProps) =
         setUnreadCount(count || 0);
       } catch (error) {
         console.error('Error fetching unread count:', error);
+        setUnreadCount(0);
       }
     };
     

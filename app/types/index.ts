@@ -14,14 +14,10 @@ export interface Request {
   user_id: string;
   title: string;
   description: string;
-  priority: 'low' | 'medium' | 'high';
-  status: 'new' | 'in_progress' | 'resolved' | 'closed';
+  priority: string;
+  status: string;
+  media_urls: MediaFile[];
   is_archived: boolean;
-  media_urls: {
-    url: string;
-    type: 'image' | 'video' | 'document';
-  }[];
-  assigned_admin_id?: string;
   created_at: Date;
   updated_at: Date;
 }
@@ -30,6 +26,28 @@ export interface Message {
   id: string;
   request_id: string;
   user_id: string;
+  sender_name: string;
+  sender_photo?: string;
+  sender_role: 'dealer' | 'admin' | 'superadmin';
   content: string;
   created_at: Date;
+  is_read: boolean;
+  attachments?: MediaFile[];
+}
+
+export interface Chat {
+  request_id: string;
+  request_title: string;
+  last_message: string;
+  last_message_time: Date;
+  unread_count: number;
+  participants: string[];
+}
+
+export interface MediaFile {
+  url: string;
+  type: 'image' | 'video' | 'document';
+  name?: string;
+  icon?: string;
+  originalName?: string;
 }
