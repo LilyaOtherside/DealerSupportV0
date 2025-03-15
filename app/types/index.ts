@@ -20,6 +20,7 @@ export interface Request {
   is_archived: boolean;
   created_at: Date;
   updated_at: Date;
+  assigned_admin_id?: string;
 }
 
 export interface Message {
@@ -42,11 +43,17 @@ export interface Chat {
   last_message_time: Date;
   unread_count: number;
   participants: string[];
+  status: string;
+  admin_name?: string;
+  user_name?: string;
+  user_photo?: string;
+  dealer_center?: string;
+  city?: string;
 }
 
 export interface MediaFile {
   url: string;
-  type: 'image' | 'video' | 'document';
+  type: 'image' | 'video' | 'document' | 'audio';
   name?: string;
   icon?: string;
   originalName?: string;
