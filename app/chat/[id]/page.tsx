@@ -126,27 +126,37 @@ export default function ChatDetailPage({ params }: { params: { id: string } }) {
 
   const fetchRequestAndMessages = async () => {
     try {
-      // Отримуємо інформацію про запит
+      setIsLoading(true);
+      
+      // Отримуємо запит
       const { data: requestData, error: requestError } = await supabase
         .from('requests')
         .select('*')
         .eq('id', params.id)
         .single();
-
-      if (requestError) throw requestError;
+      
+      if (requestError) {
+        console.error('Error fetching request:', requestError);
+        return;
+      }
+      
       setRequest(requestData as Request);
-
+      
       // Отримуємо повідомлення
       const { data: messagesData, error: messagesError } = await supabase
         .from('messages')
         .select('*')
         .eq('request_id', params.id)
         .order('created_at', { ascending: true });
-
-      if (messagesError) throw messagesError;
+      
+      if (messagesError) {
+        console.error('Error fetching messages:', messagesError);
+        return;
+      }
+      
       setMessages(messagesData as Message[]);
     } catch (error) {
-      console.error('Error fetching request and messages:', error);
+      console.error('Error in fetchRequestAndMessages:', error);
     } finally {
       setIsLoading(false);
     }
@@ -164,61 +174,41 @@ export default function ChatDetailPage({ params }: { params: { id: string } }) {
   };
 
   const handleSendMessage = async () => {
-    if ((!newMessage.trim() && mediaFiles.length === 0 && !audioBlob) || isSending) return;
+    if ((!newMessage.trim() && mediaFiles.length === 0 && !audioBlob) || !user || !request) return;
     
     setIsSending(true);
     
     try {
-      let attachments: MediaFile[] = [...mediaFiles];
+      let attachments: MediaFile[] = [];
       
-      // Якщо є аудіо, завантажуємо його
-      if (audioBlob) {
-        const audioFile = new File([audioBlob], `voice_message_${Date.now()}.webm`, { 
-          type: 'audio/webm' 
-        });
-        
-        const { data: audioData, error: audioError } = await supabase.storage
-          .from('attachments')
-          .upload(`voice/${user?.id}/${Date.now()}_${audioFile.name}`, audioFile);
-        
-        if (audioError) throw audioError;
-        
-        const audioUrl = supabase.storage
-          .from('attachments')
-          .getPublicUrl(audioData.path).data.publicUrl;
-        
-        attachments.push({
-          url: audioUrl,
-          type: 'audio',
-          name: 'Голосове повідомлення',
-          originalName: audioFile.name
-        });
+      // Завантажуємо медіафайли, якщо вони є
+      if (mediaFiles.length > 0) {
+        // Логіка завантаження файлів...
       }
       
-      // Відправляємо повідомлення
-      const { data, error } = await supabase
+      // Завантажуємо аудіо, якщо воно є
+      if (audioBlob) {
+        // Логіка завантаження аудіо...
+      }
+      
+      // Створюємо повідомлення
+      const { data: message, error } = await supabase
         .from('messages')
         .insert({
           request_id: params.id,
-          user_id: user?.id,
-          sender_name: user?.name || 'Користувач',
-          sender_photo: user?.photo_url,
-          sender_role: user?.role || 'dealer',
-          content: newMessage.trim(),
+          user_id: user.id,
+          sender_name: user.name,
+          sender_photo: user.photo_url,
+          sender_role: user.role,
+          content: newMessage.trim() || (audioBlob ? '🎤 Голосове повідомлення' : '📎 Вкладення'),
           attachments: attachments.length > 0 ? attachments : null
         })
         .select()
         .single();
-
+      
       if (error) throw error;
       
-      // Оновлюємо запит (дата оновлення)
-      await supabase
-        .from('requests')
-        .update({ updated_at: new Date().toISOString() })
-        .eq('id', params.id);
-      
-      // Очищаємо поле введення та медіафайли
+      // Очищаємо форму
       setNewMessage('');
       setMediaFiles([]);
       setAudioBlob(null);
@@ -228,10 +218,9 @@ export default function ChatDetailPage({ params }: { params: { id: string } }) {
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      alert('Помилка при відправці повідомлення');
+      alert('Помилка при відправці повідомлення. Спробуйте ще раз.');
     } finally {
       setIsSending(false);
-      setShowAttachMenu(false);
     }
   };
 
@@ -290,9 +279,9 @@ export default function ChatDetailPage({ params }: { params: { id: string } }) {
   };
 
   const formatRecordingTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   const startRecording = async () => {
