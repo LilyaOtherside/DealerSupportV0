@@ -382,6 +382,9 @@ export default function RequestsPage() {
             ))}
           </div>
         )}
+        
+        {/* Додаємо відступ внизу для нижньої навігаційної панелі */}
+        <div className="h-20"></div>
       </div>
 
       <BottomNav 
