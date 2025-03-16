@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { Request, Message, User, MediaFile } from '@/app/types';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import Image from 'next/image';
 import { 
   ArrowLeft, 
   Send, 
@@ -19,7 +20,10 @@ import {
   Mic,
   Square,
   Play,
-  Pause
+  Pause,
+  Clock,
+  Check,
+  CheckCheck
 } from 'lucide-react';
 
 export default function ChatDetailPage({ params }: { params: { id: string } }) {
@@ -43,6 +47,7 @@ export default function ChatDetailPage({ params }: { params: { id: string } }) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -87,8 +92,8 @@ export default function ChatDetailPage({ params }: { params: { id: string } }) {
     }
   }, [user, params.id]);
 
+  // Прокручуємо до останнього повідомлення при завантаженні або отриманні нового
   useEffect(() => {
-    // Прокручуємо до останнього повідомлення при завантаженні або отриманні нового
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     
     // Позначаємо всі повідомлення як прочитані
@@ -179,20 +184,34 @@ export default function ChatDetailPage({ params }: { params: { id: string } }) {
     setIsSending(true);
     
     try {
-      let attachments: MediaFile[] = [];
+      let attachments: MediaFile[] = [...mediaFiles];
       
-      // Завантажуємо медіафайли, якщо вони є
-      if (mediaFiles.length > 0) {
-        // Логіка завантаження файлів...
-      }
-      
-      // Завантажуємо аудіо, якщо воно є
+      // Якщо є аудіо, завантажуємо його
       if (audioBlob) {
-        // Логіка завантаження аудіо...
+        const audioFile = new File([audioBlob], `voice_message_${Date.now()}.webm`, { 
+          type: 'audio/webm' 
+        });
+        
+        const { data: audioData, error: audioError } = await supabase.storage
+          .from('attachments')
+          .upload(`voice/${user.id}/${Date.now()}_${audioFile.name}`, audioFile);
+        
+        if (audioError) throw audioError;
+        
+        const audioUrl = supabase.storage
+          .from('attachments')
+          .getPublicUrl(audioData.path).data.publicUrl;
+        
+        attachments.push({
+          url: audioUrl,
+          type: 'audio',
+          name: 'Голосове повідомлення',
+          originalName: audioFile.name
+        });
       }
       
-      // Створюємо повідомлення
-      const { data: message, error } = await supabase
+      // Відправляємо повідомлення
+      const { data, error } = await supabase
         .from('messages')
         .insert({
           request_id: params.id,
@@ -208,7 +227,13 @@ export default function ChatDetailPage({ params }: { params: { id: string } }) {
       
       if (error) throw error;
       
-      // Очищаємо форму
+      // Оновлюємо запит (дата оновлення)
+      await supabase
+        .from('requests')
+        .update({ updated_at: new Date().toISOString() })
+        .eq('id', params.id);
+      
+      // Очищаємо поле введення та медіафайли
       setNewMessage('');
       setMediaFiles([]);
       setAudioBlob(null);
@@ -218,9 +243,10 @@ export default function ChatDetailPage({ params }: { params: { id: string } }) {
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      alert('Помилка при відправці повідомлення. Спробуйте ще раз.');
+      alert('Помилка при відправці повідомлення');
     } finally {
       setIsSending(false);
+      setShowAttachMenu(false);
     }
   };
 
@@ -361,62 +387,70 @@ export default function ChatDetailPage({ params }: { params: { id: string } }) {
 
   if (!request) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-tg-theme-bg to-tg-theme-section text-white p-4">
-        <div className="bg-red-500/10 text-red-500 p-4 rounded-lg">
-          <p>Запит не знайдено</p>
-          <Button 
-            onClick={() => router.push('/chat')}
-            className="mt-4"
-          >
-            Повернутися до списку чатів
-          </Button>
-        </div>
+      <div className="min-h-screen bg-gradient-to-b from-tg-theme-bg to-tg-theme-section text-white flex flex-col items-center justify-center p-4">
+        <Info className="h-12 w-12 text-yellow-500 mb-4" />
+        <h1 className="text-xl font-bold mb-2">Запит не знайдено</h1>
+        <p className="text-center text-tg-theme-hint mb-6">
+          Запит не існує або був видалений
+        </p>
+        <Button
+          onClick={() => router.push('/chat')}
+          className="bg-blue-500 hover:bg-blue-600"
+        >
+          Повернутися до чатів
+        </Button>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-tg-theme-bg to-tg-theme-section text-white flex flex-col">
-      {/* Заголовок */}
-      <div className="sticky top-0 z-10 bg-tg-theme-bg/80 backdrop-blur-lg">
-        <div className="flex items-center justify-between p-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full"
-            onClick={() => router.push('/chat')}
-          >
-            <ArrowLeft className="h-6 w-6" />
-          </Button>
-          <div className="text-xl font-semibold truncate max-w-[200px]">
-            {request.title}
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full"
-            onClick={() => router.push(`/requests/${params.id}`)}
-          >
-            <Info className="h-6 w-6" />
-          </Button>
+      {/* Верхня панель */}
+      <div className="bg-tg-theme-section/80 backdrop-blur-lg p-4 flex items-center gap-3 sticky top-0 z-10">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 rounded-full"
+          onClick={() => router.push('/chat')}
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <div className="flex-1">
+          <h1 className="font-medium line-clamp-1">{request.title}</h1>
+          <p className="text-xs text-tg-theme-hint">
+            {request.status === 'new' ? 'Новий запит' :
+             request.status === 'in_progress' ? 'В роботі' :
+             request.status === 'resolved' ? 'Вирішено' : 'Закрито'}
+          </p>
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 rounded-full"
+          onClick={() => router.push(`/requests/${request.id}`)}
+        >
+          <Info className="h-5 w-5" />
+        </Button>
       </div>
 
       {/* Повідомлення */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div 
+        className="flex-1 p-4 overflow-y-auto" 
+        ref={messagesContainerRef}
+      >
         {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-center">
+          <div className="h-full flex flex-col items-center justify-center text-center p-4">
             <div className="bg-tg-theme-button/30 rounded-full p-4 mb-4">
               <MessageCircle className="h-8 w-8 text-tg-theme-button-text" />
             </div>
             <h3 className="text-xl font-semibold mb-2">Немає повідомлень</h3>
             <p className="text-tg-theme-hint mb-6">
-              Напишіть перше повідомлення, щоб почати спілкування з підтримкою.
+              Напишіть перше повідомлення, щоб почати спілкування
             </p>
           </div>
         ) : (
           <div className="space-y-4">
-            {messages.map((message, index) => (
+            {messages.map((message) => (
               <div
                 key={message.id}
                 className={`flex ${message.user_id === user?.id ? 'justify-end' : 'justify-start'}`}
@@ -429,66 +463,91 @@ export default function ChatDetailPage({ params }: { params: { id: string } }) {
                   }`}
                 >
                   {message.user_id !== user?.id && (
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-1">
                       {message.sender_photo ? (
                         <img
                           src={message.sender_photo}
                           alt={message.sender_name}
-                          className="w-6 h-6 rounded-full object-cover"
+                          className="w-5 h-5 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="w-6 h-6 rounded-full bg-tg-theme-button/30 flex items-center justify-center">
-                          <span className="text-xs">{message.sender_name.charAt(0)}</span>
+                        <div className="w-5 h-5 rounded-full bg-tg-theme-button flex items-center justify-center text-xs">
+                          {message.sender_name.charAt(0)}
                         </div>
                       )}
-                      <span className="text-sm font-medium">{message.sender_name}</span>
+                      <span className="text-xs font-medium">
+                        {message.sender_name}
+                      </span>
                     </div>
                   )}
                   
+                  {/* Текст повідомлення */}
                   {message.content && (
-                    <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                    <p className="whitespace-pre-wrap break-words">
+                      {message.content}
+                    </p>
                   )}
                   
-                  {/* Відображення вкладень */}
+                  {/* Вкладення */}
                   {message.attachments && message.attachments.length > 0 && (
                     <div className="mt-2 space-y-2">
-                      {message.attachments.map((attachment, i) => (
-                        <div key={i}>
-                          {attachment.type === 'image' && (
-                            <a href={attachment.url} target="_blank" rel="noopener noreferrer">
+                      {message.attachments.map((attachment, index) => (
+                        <div key={index} className="rounded-lg overflow-hidden">
+                          {attachment.type === 'image' ? (
+                            <div className="relative aspect-video">
                               <img
                                 src={attachment.url}
-                                alt={attachment.name || 'Image'}
-                                className="rounded-lg max-h-60 w-auto object-contain"
+                                alt=""
+                                className="w-full h-full object-cover cursor-pointer"
+                                onClick={() => window.open(attachment.url, '_blank')}
                               />
-                            </a>
-                          )}
-                          
-                          {attachment.type === 'video' && (
+                            </div>
+                          ) : attachment.type === 'video' ? (
                             <video
                               src={attachment.url}
                               controls
-                              className="rounded-lg max-h-60 w-full"
+                              className="w-full rounded-lg"
                             />
-                          )}
-                          
-                          {attachment.type === 'audio' && (
-                            <audio
-                              src={attachment.url}
-                              controls
-                              className="w-full"
-                            />
-                          )}
-                          
-                          {attachment.type === 'document' && (
+                          ) : attachment.type === 'audio' ? (
+                            <div className="bg-tg-theme-bg/30 rounded-lg p-2 flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 rounded-full bg-tg-theme-button/50"
+                                onClick={() => {
+                                  const audio = new Audio(attachment.url);
+                                  audio.play();
+                                }}
+                              >
+                                <Play className="h-4 w-4" />
+                              </Button>
+                              <div className="flex-1">
+                                <div className="h-1 bg-tg-theme-button/50 rounded-full">
+                                  <div className="h-full w-0 bg-blue-500 rounded-full" />
+                                </div>
+                              </div>
+                              <span className="text-xs text-tg-theme-hint">
+                                00:00
+                              </span>
+                            </div>
+                          ) : (
                             <a
                               href={attachment.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center gap-2 bg-tg-theme-button/20 p-2 rounded-lg"
+                              className="bg-tg-theme-bg/30 rounded-lg p-2 flex items-center gap-2"
                             >
-                              <File className="h-5 w-5" />
-                              <span className="text-sm truncate">{attachment.name}</span>
+                              <div className="bg-tg-theme-button/50 rounded-lg p-2">
+                                <File className="h-4 w-4" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">
+                                  {attachment.name || attachment.originalName || 'Файл'}
+                                </p>
+                                <p className="text-xs text-tg-theme-hint">
+                                  Натисніть, щоб завантажити
+                                </p>
+                              </div>
                             </a>
                           )}
                         </div>
@@ -496,10 +555,18 @@ export default function ChatDetailPage({ params }: { params: { id: string } }) {
                     </div>
                   )}
                   
-                  <div className="text-right mt-1">
-                    <span className={`text-xs ${message.user_id === user?.id ? 'text-blue-100' : 'text-tg-theme-hint'}`}>
-                      {formatMessageTime(new Date(message.created_at))}
-                    </span>
+                  {/* Час та статус */}
+                  <div className={`flex items-center gap-1 mt-1 text-xs ${
+                    message.user_id === user?.id ? 'text-blue-100' : 'text-tg-theme-hint'
+                  }`}>
+                    <span>{formatMessageTime(message.created_at)}</span>
+                    {message.user_id === user?.id && (
+                      message.is_read ? (
+                        <CheckCheck className="h-3 w-3" />
+                      ) : (
+                        <Check className="h-3 w-3" />
+                      )
+                    )}
                   </div>
                 </div>
               </div>
@@ -510,108 +577,71 @@ export default function ChatDetailPage({ params }: { params: { id: string } }) {
       </div>
 
       {/* Поле введення */}
-      <div className="p-4 bg-tg-theme-bg/80 backdrop-blur-lg">
-        {/* Попередній перегляд медіафайлів */}
-        {mediaFiles.length > 0 && (
-          <div className="mb-2 flex flex-wrap gap-2">
-            {mediaFiles.map((file, index) => (
-              <div key={index} className="relative">
-                {file.type === 'image' ? (
-                  <div className="relative w-20 h-20">
-                    <img
-                      src={file.url}
-                      alt={file.name}
-                      className="w-full h-full object-cover rounded-lg"
-                    />
-                    <button
-                      onClick={() => removeMediaFile(index)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="relative bg-tg-theme-section p-2 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      {file.type === 'video' ? (
-                        <FileVideo className="h-5 w-5" />
-                      ) : (
-                        <File className="h-5 w-5" />
-                      )}
-                      <span className="text-sm truncate max-w-[100px]">{file.name}</span>
-                    </div>
-                    <button
-                      onClick={() => removeMediaFile(index)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-        
-        {/* Аудіо запис */}
-        {audioBlob && !isRecording && (
-          <div className="mb-2">
-            <div className="bg-tg-theme-section p-3 rounded-lg flex items-center gap-3">
-              <button
-                onClick={toggleAudioPlayback}
-                className="bg-blue-500 text-white rounded-full p-2"
-              >
-                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-              </button>
-              <div className="flex-1">
-                <div className="h-2 bg-tg-theme-button/30 rounded-full">
-                  <div className="h-full bg-blue-500 rounded-full" style={{ width: isPlaying ? '50%' : '0%' }} />
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  if (audioUrl) {
-                    URL.revokeObjectURL(audioUrl);
-                  }
-                  setAudioBlob(null);
-                  setAudioUrl(null);
-                }}
-                className="text-red-500"
-              >
-                <X className="h-4 w-4" />
-              </button>
-              <audio
-                ref={audioRef}
-                src={audioUrl || ''}
-                onEnded={handleAudioEnded}
-                className="hidden"
-              />
-            </div>
-          </div>
-        )}
-        
-        {/* Запис голосового повідомлення */}
+      <div className="bg-tg-theme-section/80 backdrop-blur-lg p-3 sticky bottom-0 z-10">
         {isRecording ? (
-          <div className="flex items-center gap-3 mb-2 bg-tg-theme-section p-3 rounded-lg">
-            <div className="animate-pulse bg-red-500 rounded-full p-2">
-              <Mic className="h-5 w-5 text-white" />
-            </div>
-            <div className="flex-1">
-              <div className="text-sm">Запис голосового повідомлення</div>
-              <div className="text-xs text-tg-theme-hint">{formatRecordingTime(recordingTime)}</div>
-            </div>
-            <button
+          <div className="flex items-center gap-2 bg-tg-theme-bg/50 backdrop-blur-sm rounded-full px-4 py-2">
+            <div className="w-3 h-3 rounded-full bg-red-500 animate-pulse" />
+            <span className="text-sm font-medium">
+              {formatRecordingTime(recordingTime)}
+            </span>
+            <div className="flex-1" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full text-red-500 hover:bg-red-500/20"
+              onClick={cancelRecording}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full text-white hover:bg-tg-theme-button/50"
               onClick={stopRecording}
-              className="bg-blue-500 text-white rounded-full p-2"
             >
               <Square className="h-4 w-4" />
-            </button>
-            <button
-              onClick={cancelRecording}
-              className="text-red-500"
+            </Button>
+          </div>
+        ) : audioBlob ? (
+          <div className="flex items-center gap-2 bg-tg-theme-bg/50 backdrop-blur-sm rounded-full px-4 py-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full bg-tg-theme-button/50"
+              onClick={toggleAudioPlayback}
             >
-              <X className="h-5 w-5" />
-            </button>
+              {isPlaying ? (
+                <Pause className="h-4 w-4" />
+              ) : (
+                <Play className="h-4 w-4" />
+              )}
+            </Button>
+            <div className="h-1 flex-1 bg-tg-theme-button/50 rounded-full">
+              <div className="h-full w-0 bg-blue-500 rounded-full" />
+            </div>
+            <audio ref={audioRef} src={audioUrl || ''} onEnded={handleAudioEnded} />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full text-red-500 hover:bg-red-500/20"
+              onClick={() => {
+                if (audioUrl) {
+                  URL.revokeObjectURL(audioUrl);
+                }
+                setAudioBlob(null);
+                setAudioUrl(null);
+              }}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-full text-tg-theme-hint hover:text-white hover:bg-tg-theme-button/50"
+              onClick={handleSendMessage}
+            >
+              <Send className="h-4 w-4" />
+            </Button>
           </div>
         ) : (
           <div className="flex items-center gap-2">
